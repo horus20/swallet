@@ -25,7 +25,7 @@ describe("DigitalRuble contract", function () {
   async function deployTokenFixture() {
     // Get the ContractFactory and Signers here.
     const Token = await ethers.getContractFactory("DigitalRuble");
-    const [owner, addr1, addr2] = await ethers.getSigners();
+    const [owner, addr1, addr2, addr3] = await ethers.getSigners();
 
     // To deploy our contract, we just have to call Token.deploy() and await
     // for it to be deployed(), which happens onces its transaction has been
@@ -35,7 +35,7 @@ describe("DigitalRuble contract", function () {
     await hardhatToken.deployed();
 
     // Fixtures can return anything you consider useful for your tests
-    return { Token, hardhatToken, owner, addr1, addr2 };
+    return { Token, hardhatToken, owner, addr1, addr2, addr3 };
   }
 
   // You can nest describe calls to create subsections.
@@ -49,6 +49,7 @@ describe("DigitalRuble contract", function () {
       // things went well
       const { hardhatToken, owner } = await loadFixture(deployTokenFixture);
 
+      await hardhatToken.pp();
       // Expect receives a value and wraps it in an assertion object. These
       // objects have a lot of utility methods to assert values.
 
@@ -100,7 +101,7 @@ describe("DigitalRuble contract", function () {
       // `require` will evaluate false and revert the transaction.
       await expect(
         hardhatToken.connect(addr1).transfer(owner.address, 1)
-      ).to.be.revertedWith("Not enough tokens");
+      ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
 
       // Owner balance shouldn't have changed.
       expect(await hardhatToken.balanceOf(owner.address)).to.equal(
