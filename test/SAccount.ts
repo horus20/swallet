@@ -1,5 +1,4 @@
-// @ts-ignore
-import { ethers } from 'hardhat'
+import { ethers } from "hardhat"
 
 const { expect } = require("chai");
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
