@@ -1,0 +1,56 @@
+{
+  "extends": [
+    "airbnb-typescript/base"
+  ],
+  "parserOptions": {
+    "project": ["./tsconfig.json","./tsconfig.jest.json"]
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".ts",
+          ".tsx"
+        ]
+      }
+    }
+  },
+  "rules": {
+    "@typescript-eslint/return-await": "off",
+    "class-methods-use-this": "off",
+    "no-underscore-dangle": [
+      "off",
+      {
+        "allow": [],
+        "allowAfterThis": false,
+        "allowAfterSuper": false,
+        "enforceInMethodNames": false
+      }
+    ],
+    "max-len": [
+      "error",
+      150,
+      2,
+      {
+        "ignoreUrls": true,
+        "ignoreComments": false,
+        "ignoreRegExpLiterals": true,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true
+      }
+    ],
+    "no-unused-vars": "off",
+    "no-shadow": "off",
+    "no-param-reassign": "off",
+    "no-nested-ternary": "off",
+    "prefer-const": [
+      "error",
+      {
+        "destructuring": "any",
+        "ignoreReadBeforeAssign": false
+      }
+    ]
+  }
+}
