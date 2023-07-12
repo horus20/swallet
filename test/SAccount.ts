@@ -1,5 +1,10 @@
+// @ts-ignore
+import { ethers } from 'hardhat'
+
 const { expect } = require("chai");
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
+
+import { UserOperation } from './UserOperation'
 
 describe("SAccount contract", function () {
 
@@ -15,6 +20,9 @@ describe("SAccount contract", function () {
         const sEntryPoint = await sEntryPointContract.deploy(owner.address);
         await sEntryPoint.deployed();
 
+        const secondEntryPoint = await sEntryPointContract.deploy(owner.address);
+        await secondEntryPoint.deployed();
+
         const sAccount = await sAccountContract.deploy(sEntryPoint.address);
         await sAccount.deployed();
 
@@ -24,6 +32,7 @@ describe("SAccount contract", function () {
             sAccount,
             sEntryPointContract,
             sEntryPoint,
+            secondEntryPoint,
             owner,
             addr1,
             addr2,
@@ -51,8 +60,20 @@ describe("SAccount contract", function () {
                 .to.be.revertedWith("account: available only for EntryPoint operators and account operators");
         });
 
-        it("Should check add/remove new owner keys (address)", async function () {
+        it("Should check add new owner keys (address)", async function () {
             // add/update owner keys
+            const { sAccount, sEntryPoint, owner, addr1, addr2, addr3 } = await loadFixture(deploySAccountFixture);
+
+            // add addr1 as operator with entry point operator
+            await expect(sAccount.connect(owner).updateOperator(addr1.address, true))
+                .to.emit(sAccount, "OperatorListChanged").withArgs(addr1.address, true);
+
+            // add addr2 as operator with addr1
+            await expect(sAccount.connect(addr1).updateOperator(addr2.address, true))
+                .to.emit(sAccount, "OperatorListChanged").withArgs(addr2.address, true);
+        });
+
+        it("Should disable the old owner key (address)", async function () {
             const { sAccount, sEntryPoint, owner, addr1, addr2, addr3 } = await loadFixture(deploySAccountFixture);
 
             // add addr1 as operator with entry point operator
@@ -91,16 +112,29 @@ describe("SAccount contract", function () {
                 .to.be.revertedWith("account: available only for EntryPoint operators and account operators");
         });
 
-        it("Should disable the old owner key (address)", async function () {
-            // add/update owner keys
-        });
-
         it("Should change an entry point", async function () {
             // update entry point
+            const { sAccount, sEntryPoint, secondEntryPoint, owner, addr1, addr2, addr3 } = await loadFixture(deploySAccountFixture);
+
+            // add addr1 as operator with entry point operator
+            await expect(sAccount.connect(owner).updateOperator(addr1.address, true))
+                .to.emit(sAccount, "OperatorListChanged").withArgs(addr1.address, true);
+
+            await expect(sAccount.connect(owner).changeEntryPoint(secondEntryPoint.address))
+                .to.be.revertedWith("account: available only for EntryPoint and account operators")
+
+            await expect(sAccount.connect(addr1).changeEntryPoint(secondEntryPoint.address))
+                .to.emit(sAccount, "SimpleAccountInitialized").withArgs(secondEntryPoint.address);
+
+            expect(await sAccount.entryPoint()).to.equal(secondEntryPoint.address);
         });
 
-        it("Should validate op - failed", async function () {
-            // transaction - validate - failed
+        it("should return NO_SIG_VALIDATION on wrong signature", async function () {
+            const { sAccount, addr1 } = await loadFixture(deploySAccountFixture);
+
+            const userOpHash = ethers.constants.HashZero
+            const deadline = await sAccount.callStatic.validateUserOp({ ...userOp, nonce: 1 }, userOpHash, 0)
+            expect(deadline).to.eq(1)
         });
 
         it("Should validate op and transfer", async function () {

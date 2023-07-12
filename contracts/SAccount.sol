@@ -17,7 +17,7 @@ import "./interfaces/IEntryPointWithOperator.sol";
 contract SAccount is Operator, BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initializable {
     using ECDSA for bytes32;
 
-    IEntryPointWithOperator private immutable _entryPoint;
+    IEntryPointWithOperator private _entryPoint;
 
     event SimpleAccountInitialized(IEntryPointWithOperator indexed entryPoint);
 
@@ -36,6 +36,12 @@ contract SAccount is Operator, BaseAccount, TokenCallbackHandler, UUPSUpgradeabl
     constructor(IEntryPointWithOperator anEntryPoint) {
         _entryPoint = anEntryPoint;
         _disableInitializers();
+    }
+
+    function changeEntryPoint(IEntryPointWithOperator newEntryPoint) external {
+        _requireFromEntryPointOrOwner();
+        _entryPoint = newEntryPoint;
+        _entryPointChanged();
     }
 
     /**
@@ -68,16 +74,16 @@ contract SAccount is Operator, BaseAccount, TokenCallbackHandler, UUPSUpgradeabl
       * the implementation by calling `upgradeTo()`
      */
     function initialize() public virtual initializer {
-        _initialize();
+        _entryPointChanged();
     }
 
-    function _initialize() internal virtual {
+    function _entryPointChanged() internal virtual {
         emit SimpleAccountInitialized(_entryPoint);
     }
 
     // Require the function call went through EntryPoint or owner
     function _requireFromEntryPointOrOwner() internal view {
-        require(msg.sender == address(entryPoint()) || this.isOperator(msg.sender), "account: available only for EntryPoint operators and account operators");
+        require(msg.sender == address(entryPoint()) || this.isOperator(msg.sender), "account: available only for EntryPoint and account operators");
     }
 
     function _requireFromEntryPointOrOperatorOrOwner() internal view {
