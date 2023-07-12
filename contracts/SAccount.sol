@@ -6,24 +6,26 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "@account-abstraction/contracts/core/BaseAccount.sol";
 import "./abstract/TokenCallbackHandler.sol";
+import "./abstract/Operator.sol";
+import "./interfaces/IEntryPointWithOperator.sol";
 /**
   * minimal account.
   *  this is sample minimal account.
   *  has execute, eth handling methods
   *  has a single signer that can send requests through the entryPoint.
   */
-contract SAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initializable {
+contract SAccount is Operator, BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initializable {
     using ECDSA for bytes32;
 
-    IEntryPoint private immutable _entryPoint;
+    IEntryPointWithOperator private immutable _entryPoint;
 
-    mapping(address => bool) owners;
+    event SimpleAccountInitialized(IEntryPointWithOperator indexed entryPoint);
 
-    event SimpleAccountInitialized(IEntryPoint indexed entryPoint);
-    event OwnerListChanged(address owner, bool enabled);
-
-    /// @inheritdoc BaseAccount
     function entryPoint() public view virtual override returns (IEntryPoint) {
+        return _entryPoint;
+    }
+
+    function entryPointWithOperator() public view returns (IEntryPointWithOperator) {
         return _entryPoint;
     }
 
@@ -31,13 +33,9 @@ contract SAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initial
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(IEntryPoint anEntryPoint) {
+    constructor(IEntryPointWithOperator anEntryPoint) {
         _entryPoint = anEntryPoint;
         _disableInitializers();
-    }
-
-    function _checkOwner(address owner) internal returns (bool result) {
-        return owners[owner];
     }
 
     /**
@@ -59,6 +57,11 @@ contract SAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initial
         }
     }
 
+    function updateOperator(address operator, bool status) external virtual override {
+        _requireFromEntryPointOrOwner();
+        _updateOperator(operator, status);
+    }
+
     /**
      * @dev The _entryPoint member is immutable, to reduce gas consumption.  To upgrade EntryPoint,
      * a new implementation of SimpleAccount must be deployed with the new EntryPoint address, then upgrading
@@ -74,14 +77,14 @@ contract SAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initial
 
     // Require the function call went through EntryPoint or owner
     function _requireFromEntryPointOrOwner() internal view {
-        require(msg.sender == address(entryPoint()) || owners[msg.sender], "account: not Owner or EntryPoint");
+        require(msg.sender == address(entryPoint()) || this.isOperator(msg.sender) || entryPointWithOperator().isOperator(msg.sender), "account: available only for EntryPoint operators and account operators");
     }
 
     /// implement template method of BaseAccount
     function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash) internal override virtual returns (uint256 validationData) {
         bytes32 hash = userOpHash.toEthSignedMessageHash();
-        address owner = hash.recover(userOp.signature);
-        if (_checkOwner(owner))
+        address operator = hash.recover(userOp.signature);
+        if (this.isOperator(operator))
             return SIG_VALIDATION_FAILED;
         return 0;
     }
@@ -98,17 +101,5 @@ contract SAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initial
     function _authorizeUpgrade(address newImplementation) internal view override {
         (newImplementation);
         _requireFromEntryPointOrOwner();
-    }
-
-    function addNewOwner(address newOwner) public {
-        _requireFromEntryPointOrOwner();
-        owners[newOwner] = true;
-        emit OwnerListChanged(newOwner, true);
-    }
-
-    function removeOwner(address oldOwner) public {
-        _requireFromEntryPointOrOwner();
-        owners[oldOwner] = false;
-        emit OwnerListChanged(oldOwner, false);
     }
 }
