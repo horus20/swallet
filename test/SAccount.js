@@ -51,7 +51,7 @@ describe("SAccount contract", function () {
                 .to.be.revertedWith("account: available only for EntryPoint operators and account operators");
         });
 
-        it("Should add new owner key (address)", async function () {
+        it("Should check add/remove new owner keys (address)", async function () {
             // add/update owner keys
             const { sAccount, sEntryPoint, owner, addr1, addr2, addr3 } = await loadFixture(deploySAccountFixture);
 
@@ -69,6 +69,25 @@ describe("SAccount contract", function () {
 
             // check addr1 disabled
             await expect(sAccount.connect(addr1).updateOperator(addr3.address, true))
+                .to.be.revertedWith("account: available only for EntryPoint operators and account operators");
+
+            // reenable addr1
+            await expect(sAccount.connect(addr2).updateOperator(addr1.address, true))
+                .to.emit(sAccount, "OperatorListChanged").withArgs(addr1.address, true);
+            await expect(sAccount.connect(addr2).updateOperator(addr3.address, true))
+                .to.emit(sAccount, "OperatorListChanged").withArgs(addr3.address, true);
+
+            // disable all exclude addr1
+            await expect(sAccount.connect(addr1).disableAllOperators())
+                .to.emit(sAccount, "OperatorListChanged").withArgs(addr2.address, false)
+                .to.emit(sAccount, "OperatorListChanged").withArgs(addr3.address, false);
+
+            // check addr2 disabled
+            await expect(sAccount.connect(addr2).updateOperator(addr1.address, false))
+                .to.be.revertedWith("account: available only for EntryPoint operators and account operators");
+
+            // check addr3 disabled
+            await expect(sAccount.connect(addr3).updateOperator(addr1.address, false))
                 .to.be.revertedWith("account: available only for EntryPoint operators and account operators");
         });
 

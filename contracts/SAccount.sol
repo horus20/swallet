@@ -58,7 +58,7 @@ contract SAccount is Operator, BaseAccount, TokenCallbackHandler, UUPSUpgradeabl
     }
 
     function updateOperator(address operator, bool status) external virtual override {
-        _requireFromEntryPointOrOwner();
+        _requireFromEntryPointOrOperatorOrOwner();
         _updateOperator(operator, status);
     }
 
@@ -77,6 +77,10 @@ contract SAccount is Operator, BaseAccount, TokenCallbackHandler, UUPSUpgradeabl
 
     // Require the function call went through EntryPoint or owner
     function _requireFromEntryPointOrOwner() internal view {
+        require(msg.sender == address(entryPoint()) || this.isOperator(msg.sender), "account: available only for EntryPoint operators and account operators");
+    }
+
+    function _requireFromEntryPointOrOperatorOrOwner() internal view {
         require(msg.sender == address(entryPoint()) || this.isOperator(msg.sender) || entryPointWithOperator().isOperator(msg.sender), "account: available only for EntryPoint operators and account operators");
     }
 
@@ -100,6 +104,6 @@ contract SAccount is Operator, BaseAccount, TokenCallbackHandler, UUPSUpgradeabl
 
     function _authorizeUpgrade(address newImplementation) internal view override {
         (newImplementation);
-        _requireFromEntryPointOrOwner();
+        _requireFromEntryPointOrOperatorOrOwner();
     }
 }
