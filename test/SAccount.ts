@@ -1,7 +1,10 @@
 import { ethers } from 'hardhat';
 
 import { UserOperation } from './UserOperation';
-import { fillUserOpDefaults, signUserOp } from './UserOp';
+import {
+  AddressZero,
+  createAccountOwner, fillUserOpDefaults, getUserOpHash, signUserOp,
+} from './UserOp';
 
 const { expect } = require('chai');
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
@@ -134,26 +137,44 @@ describe('SAccount contract', () => {
       expect(await sAccount.entryPoint()).to.equal(secondEntryPoint.address);
     });
 
-    it('should return NO_SIG_VALIDATION on wrong signature', async () => {
-      const { sAccount, sEntryPoint, addr1 } = await loadFixture(deploySAccountFixture);
+    it('should check signature failed/success', async () => {
+      const {
+        sAccount, sEntryPoint, owner,
+      } = await loadFixture(deploySAccountFixture);
 
       const callGasLimit = 200000;
       const verificationGasLimit = 100000;
       const maxFeePerGas = 3e9;
       const chainId = await ethers.provider.getNetwork().then((net) => net.chainId);
 
-      const userOpHash = ethers.constants.HashZero;
+      const wallet = createAccountOwner(0);
       const unsignedUserOp = fillUserOpDefaults({
         sender: sAccount.address,
         callGasLimit,
         verificationGasLimit,
         maxFeePerGas,
       });
-      const userOp: UserOperation = signUserOp(unsignedUserOp, addr1, sEntryPoint.address, chainId);
 
-      console.log(chainId, unsignedUserOp, userOp);
-      const deadline = await sAccount.callStatic.validateUserOp({ ...userOp, nonce: 1 }, userOpHash, 0);
-      expect(deadline).to.eq(1);
+      const userOp: UserOperation = signUserOp(unsignedUserOp, wallet, sEntryPoint.address, chainId);
+      const userOpHash = await getUserOpHash(userOp, sEntryPoint.address, chainId);
+      console.log(wallet.address, userOpHash);
+
+      // const result = await sAccount.connect(addr1).validateUserOp({ ...userOp, nonce: 1 }, userOpHash, 0);
+      try {
+        await sEntryPoint.connect(owner).simulateValidation(userOp);
+      } catch (e: any) {
+        expect(e.message).to.include('FailedOp(0, "AA24 signature error")');
+      }
+
+      // add operator
+      await expect(sAccount.connect(owner).updateOperator(wallet.address, true))
+        .to.emit(sAccount, 'OperatorListChanged').withArgs(wallet.address, true);
+
+      try {
+        await sEntryPoint.connect(owner).simulateValidation(userOp);
+      } catch (e: any) {
+        expect(e.message).to.include('ValidationResult');
+      }
     });
 
     it('Should validate op and transfer', async () => {

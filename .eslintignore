@@ -3,4 +3,6 @@ node_modules/
 types/
 dist/
 coverage/
+contracts/
 jest.setup.ts
+hardhat.config.ts

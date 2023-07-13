@@ -8,6 +8,8 @@ import "@account-abstraction/contracts/core/BaseAccount.sol";
 import "./abstract/TokenCallbackHandler.sol";
 import "./abstract/Operator.sol";
 import "./interfaces/IEntryPointWithOperator.sol";
+
+import "hardhat/console.sol"; // todo: remove this
 /**
   * minimal account.
   *  this is sample minimal account.
@@ -94,8 +96,15 @@ contract SAccount is Operator, BaseAccount, TokenCallbackHandler, UUPSUpgradeabl
     function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash) internal override virtual returns (uint256 validationData) {
         bytes32 hash = userOpHash.toEthSignedMessageHash();
         address operator = hash.recover(userOp.signature);
-        if (this.isOperator(operator))
+
+        // console.log("address: %s", operator);
+        // console.logBytes32(userOpHash);
+
+        if (!this.isOperator(operator)) {
+            // console.log("SIG_VALIDATION_FAILED");
             return SIG_VALIDATION_FAILED;
+        }
+        // console.log("Signature success");
         return 0;
     }
 
