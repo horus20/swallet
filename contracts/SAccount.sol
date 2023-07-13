@@ -2,7 +2,6 @@ pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "@account-abstraction/contracts/core/BaseAccount.sol";
 import "./abstract/TokenCallbackHandler.sol";
@@ -16,7 +15,7 @@ import "hardhat/console.sol"; // todo: remove this
   *  has execute, eth handling methods
   *  has a single signer that can send requests through the entryPoint.
   */
-contract SAccount is Operator, BaseAccount, TokenCallbackHandler, UUPSUpgradeable, Initializable {
+contract SAccount is Operator, BaseAccount, TokenCallbackHandler, Initializable {
     using ECDSA for bytes32;
 
     IEntryPointWithOperator private _entryPoint;
@@ -117,10 +116,5 @@ contract SAccount is Operator, BaseAccount, TokenCallbackHandler, UUPSUpgradeabl
                 revert(add(result, 32), mload(result))
             }
         }
-    }
-
-    function _authorizeUpgrade(address newImplementation) internal view override {
-        (newImplementation);
-        _requireFromEntryPointOrOperatorOrOwner();
     }
 }

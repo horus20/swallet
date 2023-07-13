@@ -4,7 +4,7 @@ import { parseEther } from 'ethers/lib/utils';
 import { UserOperation } from './UserOperation';
 import {
   AddressZero,
-  createAccountOwner, fillUserOpDefaults, getBalance, getUserOpHash, ONE_ETH, signUserOp,
+  createAccountOwner, fillAndSign, fillUserOpDefaults, getBalance, ONE_ETH, signUserOp,
 } from './UserOp';
 
 const { expect } = require('chai');
@@ -226,7 +226,7 @@ describe('SAccount contract', () => {
       await sEntryPoint.connect(owner).handleOps([userOp], AddressZero);
       const newBalanceSAccount = await getBalance(provider, sAccount.address);
       const newBalanceTestWallet = await getBalance(provider, testWallet.address);
-      console.log(`sAccount (${sAccount.address}) balance: `, newBalanceSAccount, ' Test wallet new balance: ', newBalanceTestWallet);
+      // console.log(`sAccount (${sAccount.address}) balance: `, newBalanceSAccount, ' Test wallet new balance: ', newBalanceTestWallet);
 
       expect(newBalanceSAccount).to.equal('0.9');
       expect(newBalanceTestWallet).to.equal('0.1');
@@ -249,7 +249,7 @@ describe('SAccount contract', () => {
       // console.log(`testWallet (${testWallet.address}) balance: `, await rdrToken.balanceOf(testWallet.address), 'RDR');
 
       // console.log(`sAccount (${sAccount.address}) balance: `, await getBalance(provider, sAccount.address), 'ETH');
-      // console.log(`owner (${owner.address}) balance: `, await getBalance(provider, owner.address), 'ETH');
+      console.log(`owner (${owner.address}) balance: `, await getBalance(provider, owner.address), 'ETH');
       // console.log(`SEntryPoint (${sEntryPoint.address}) balance: `, await getBalance(provider, sEntryPoint.address), 'ETH');
 
       // console.log('RDR address: ', rdrToken.address);
@@ -287,11 +287,30 @@ describe('SAccount contract', () => {
       // console.log(`sAccount (${sAccount.address})  balance: `, newBalanceSAccount, 'RDR   Test wallet new balance: ', newBalanceTestWallet, 'RDR');
 
       // console.log(`sAccount (${sAccount.address}) balance: `, await getBalance(provider, sAccount.address), 'ETH');
-      // console.log(`owner (${owner.address}) balance: `, await getBalance(provider, owner.address), 'ETH');
+      console.log(`owner (${owner.address}) balance: `, await getBalance(provider, owner.address), 'ETH');
       // console.log(`SEntryPoint (${sEntryPoint.address}) balance: `, await getBalance(provider, sEntryPoint.address), 'ETH');
 
       expect(newBalanceSAccount).to.equal('40');
       expect(newBalanceTestWallet).to.equal('10');
+    });
+
+    it('should revert if wallet not deployed (and no initcode)', async () => {
+      const {
+        sEntryPoint, owner,
+      } = await loadFixture(deploySAccountFixture);
+
+      const wallet = createAccountOwner(0);
+      const op = await fillAndSign({
+        sender: wallet.address,
+        nonce: 0,
+        verificationGasLimit: 1000,
+      }, owner, sEntryPoint);
+
+      try {
+        await sEntryPoint.connect(owner).simulateValidation(op);
+      } catch (e: any) {
+        expect(e.message).to.include('FailedOp(0, "AA20 account not deployed")');
+      }
     });
   });
 });

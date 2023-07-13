@@ -1,5 +1,5 @@
 import {
-  arrayify, defaultAbiCoder, hexDataSlice, keccak256, parseEther,
+  arrayify, defaultAbiCoder, hexConcat, hexDataSlice, keccak256, parseEther,
 } from 'ethers/lib/utils';
 import {
   BigNumber, Contract, Signer, Wallet,
@@ -8,6 +8,7 @@ import {
 import { ecsign, keccak256 as keccak256_buffer, toRpcSig } from 'ethereumjs-util';
 import { ethers } from 'hardhat';
 import { BaseProvider } from '@ethersproject/providers/src.ts/base-provider';
+import { BytesLike } from '@ethersproject/bytes';
 import { EntryPoint } from '../typechain';
 import { UserOperation } from './UserOperation';
 
@@ -293,4 +294,11 @@ export async function getBalance(provider: BaseProvider, address: string) {
   const balance = await provider.getBalance(address);
   // convert a currency unit from wei to ether
   return ethers.utils.formatEther(balance);
+}
+
+export function getAccountInitCode(factory: any, entryPointAddress: string, salt = 0): BytesLike {
+  return hexConcat([
+    factory.address,
+    factory.interface.encodeFunctionData('createAccount', [salt, entryPointAddress]),
+  ]);
 }
