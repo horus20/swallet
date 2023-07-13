@@ -1,21 +1,21 @@
 import {
-  arrayify,
-  defaultAbiCoder,
-  hexDataSlice,
-  keccak256,
+  arrayify, defaultAbiCoder, hexDataSlice, keccak256, parseEther,
 } from 'ethers/lib/utils';
 import {
   BigNumber, Contract, Signer, Wallet,
 } from 'ethers';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { ecsign, toRpcSig, keccak256 as keccak256_buffer } from 'ethereumjs-util';
+import { ecsign, keccak256 as keccak256_buffer, toRpcSig } from 'ethereumjs-util';
 import { ethers } from 'hardhat';
-import {
-  EntryPoint,
-} from '../typechain';
+import { BaseProvider } from '@ethersproject/providers/src.ts/base-provider';
+import { EntryPoint } from '../typechain';
 import { UserOperation } from './UserOperation';
 
 export const { AddressZero } = ethers.constants;
+
+export const ONE_ETH = parseEther('1');
+export const TWO_ETH = parseEther('2');
+export const FIVE_ETH = parseEther('5');
 export const { HashZero } = ethers.constants;
 
 export function packUserOp(op: UserOperation, forSignature = true): string {
@@ -287,4 +287,10 @@ export async function fillAndSign(op: Partial<UserOperation>, signer: Wallet | S
     ...op2,
     signature: await signer.signMessage(message),
   };
+}
+
+export async function getBalance(provider: BaseProvider, address: string) {
+  const balance = await provider.getBalance(address);
+  // convert a currency unit from wei to ether
+  return ethers.utils.formatEther(balance);
 }

@@ -38,6 +38,10 @@ contract SEntryPoint is ISEntryPoint, Operator, NonceManager, ReentrancyGuard {
         _updateOperator(operator, true);
     }
 
+    function _requireOperatorOrSelf() internal view {
+        require(this.isOperator(msg.sender) || msg.sender == address(this), "account: available only for operator");
+    }
+
     /**
      * execute a user op
      * @param opIndex index into the opInfo array
@@ -78,6 +82,7 @@ contract SEntryPoint is ISEntryPoint, Operator, NonceManager, ReentrancyGuard {
      * @param beneficiary the address to receive the fees
      */
     function handleOps(UserOperation[] calldata ops, address payable beneficiary) public nonReentrant {
+        _requireOperatorOrSelf();
 
         uint256 opslen = ops.length;
         UserOpInfo[] memory opInfos = new UserOpInfo[](opslen);
@@ -99,6 +104,7 @@ contract SEntryPoint is ISEntryPoint, Operator, NonceManager, ReentrancyGuard {
     }
 
     function simulateHandleOp(UserOperation calldata op, address target, bytes calldata targetCallData) external override {
+        _requireOperatorOrSelf();
 
         UserOpInfo memory opInfo;
         _simulationOnlyValidations(op);
@@ -143,6 +149,8 @@ contract SEntryPoint is ISEntryPoint, Operator, NonceManager, ReentrancyGuard {
      * Must be declared "external" to open a call context, but it can only be called by handleOps.
      */
     function innerHandleOp(bytes memory callData, UserOpInfo memory opInfo, bytes calldata context) external returns (uint256 actualGasCost) {
+        _requireOperatorOrSelf();
+
         uint256 preGas = gasleft();
         require(msg.sender == address(this), "AA92 internal call only");
         MemoryUserOp memory mUserOp = opInfo.mUserOp;
@@ -212,6 +220,8 @@ contract SEntryPoint is ISEntryPoint, Operator, NonceManager, ReentrancyGuard {
      * @param userOp the user operation to validate.
      */
     function simulateValidation(UserOperation calldata userOp) external {
+        _requireOperatorOrSelf();
+
         UserOpInfo memory outOpInfo;
 
         _simulationOnlyValidations(userOp);

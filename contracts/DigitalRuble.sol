@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
 contract DigitalRuble is ERC20, ERC20Permit, Ownable {
-    constructor() ERC20("DigitalRuble", "DRR") ERC20Permit("DigitalRuble") {
+    constructor() ERC20("DigitalRuble", "RDR") ERC20Permit("DigitalRuble") {
         _mint(msg.sender, 1000000 * 10 ** decimals());
     }
 

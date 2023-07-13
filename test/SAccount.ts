@@ -1,9 +1,10 @@
 import { ethers } from 'hardhat';
 
+import { parseEther } from 'ethers/lib/utils';
 import { UserOperation } from './UserOperation';
 import {
   AddressZero,
-  createAccountOwner, fillUserOpDefaults, getUserOpHash, signUserOp,
+  createAccountOwner, fillUserOpDefaults, getBalance, getUserOpHash, ONE_ETH, signUserOp,
 } from './UserOp';
 
 const { expect } = require('chai');
@@ -28,6 +29,8 @@ describe('SAccount contract', () => {
     const sAccount = await sAccountContract.deploy(sEntryPoint.address);
     await sAccount.deployed();
 
+    const { provider } = ethers;
+
     // Fixtures can return anything you consider useful for your tests
     return {
       sAccountContract,
@@ -35,6 +38,7 @@ describe('SAccount contract', () => {
       sEntryPointContract,
       sEntryPoint,
       secondEntryPoint,
+      provider,
       owner,
       addr1,
       addr2,
@@ -177,8 +181,96 @@ describe('SAccount contract', () => {
       }
     });
 
-    it('Should validate op and transfer', async () => {
+    it('Should validate op and transfer ETH', async () => {
       // transaction - validate - execute - emit event
+      const {
+        sAccount, sEntryPoint, owner, provider,
+      } = await loadFixture(deploySAccountFixture);
+
+      const wallet = createAccountOwner(0);
+      const testWallet = createAccountOwner(1);
+
+      await owner.sendTransaction({ to: sAccount.address, value: ONE_ETH });
+      console.log(`sAccount (${sAccount.address}) balance: `, await getBalance(provider, sAccount.address));
+      console.log(`testWallet (${testWallet.address}) balance: `, await getBalance(provider, testWallet.address));
+      console.log('Add sAccount operator with address: ', wallet.address);
+
+      await expect(sAccount.connect(owner).updateOperator(wallet.address, true))
+        .to.emit(sAccount, 'OperatorListChanged').withArgs(wallet.address, true);
+
+      const callGasLimit = 200000;
+      const verificationGasLimit = 100000;
+      const maxFeePerGas = 3e9;
+      const chainId = await ethers.provider.getNetwork().then((net) => net.chainId);
+
+      const callData = sAccount.interface.encodeFunctionData('execute', [testWallet.address, parseEther('0.1'), '0x']);
+      const nonce = await sAccount.getNonce();
+      const unsignedUserOp = fillUserOpDefaults({
+        sender: sAccount.address,
+        nonce,
+        callData,
+        callGasLimit,
+        verificationGasLimit,
+        maxFeePerGas,
+      });
+
+      const userOp: UserOperation = signUserOp(unsignedUserOp, wallet, sEntryPoint.address, chainId);
+      // const userOpHash = await getUserOpHash(userOp, sEntryPoint.address, chainId);
+      // console.log('Try to run userOp, hash: ', userOpHash, userOp, 'owner: ', owner.address);
+
+      await sEntryPoint.connect(owner).handleOps([userOp], AddressZero);
+      const newBalanceSAccount = await getBalance(provider, sAccount.address);
+      const newBalanceTestWallet = await getBalance(provider, testWallet.address);
+      console.log(`sAccount (${sAccount.address}) balance: `, newBalanceSAccount, ' Test wallet new balance: ', newBalanceTestWallet);
+
+      expect(newBalanceSAccount).to.equal('0.9');
+      expect(newBalanceTestWallet).to.equal('0.1');
+    });
+
+    it('Should validate op and transfer RDR', async () => {
+      // transaction - validate - execute - emit event
+      const {
+        sAccount, sEntryPoint, owner, provider,
+      } = await loadFixture(deploySAccountFixture);
+
+      const wallet = createAccountOwner(0);
+      const testWallet = createAccountOwner(1);
+
+      await owner.sendTransaction({ to: sAccount.address, value: ONE_ETH });
+      console.log(`sAccount (${sAccount.address}) balance: `, await getBalance(provider, sAccount.address));
+      console.log(`testWallet (${testWallet.address}) balance: `, await getBalance(provider, testWallet.address));
+      console.log('Add sAccount operator with address: ', wallet.address);
+
+      await expect(sAccount.connect(owner).updateOperator(wallet.address, true))
+        .to.emit(sAccount, 'OperatorListChanged').withArgs(wallet.address, true);
+
+      const callGasLimit = 200000;
+      const verificationGasLimit = 100000;
+      const maxFeePerGas = 3e9;
+      const chainId = await ethers.provider.getNetwork().then((net) => net.chainId);
+
+      const callData = sAccount.interface.encodeFunctionData('execute', [testWallet.address, parseEther('0.1'), '0x']);
+      const nonce = await sAccount.getNonce();
+      const unsignedUserOp = fillUserOpDefaults({
+        sender: sAccount.address,
+        nonce,
+        callData,
+        callGasLimit,
+        verificationGasLimit,
+        maxFeePerGas,
+      });
+
+      const userOp: UserOperation = signUserOp(unsignedUserOp, wallet, sEntryPoint.address, chainId);
+      // const userOpHash = await getUserOpHash(userOp, sEntryPoint.address, chainId);
+      // console.log('Try to run userOp, hash: ', userOpHash, userOp, 'owner: ', owner.address);
+
+      await sEntryPoint.connect(owner).handleOps([userOp], AddressZero);
+      const newBalanceSAccount = await getBalance(provider, sAccount.address);
+      const newBalanceTestWallet = await getBalance(provider, testWallet.address);
+      console.log(`sAccount (${sAccount.address}) balance: `, newBalanceSAccount, ' Test wallet new balance: ', newBalanceTestWallet);
+
+      expect(newBalanceSAccount).to.equal('0.9');
+      expect(newBalanceTestWallet).to.equal('0.1');
     });
   });
 });
