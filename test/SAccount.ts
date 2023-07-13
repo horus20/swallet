@@ -15,6 +15,7 @@ describe('SAccount contract', () => {
     // Get the ContractFactory and Signers here.
     const sAccountContract = await ethers.getContractFactory('SAccount');
     const sEntryPointContract = await ethers.getContractFactory('SEntryPoint');
+    const Token = await ethers.getContractFactory('DigitalRuble');
     const [owner, addr1, addr2, addr3] = await ethers.getSigners();
 
     // To deploy our contract, we just have to call Token.deploy() and await
@@ -29,6 +30,9 @@ describe('SAccount contract', () => {
     const sAccount = await sAccountContract.deploy(sEntryPoint.address);
     await sAccount.deployed();
 
+    const rdrToken = await Token.deploy();
+    await rdrToken.deployed();
+
     const { provider } = ethers;
 
     // Fixtures can return anything you consider useful for your tests
@@ -38,6 +42,7 @@ describe('SAccount contract', () => {
       sEntryPointContract,
       sEntryPoint,
       secondEntryPoint,
+      rdrToken,
       provider,
       owner,
       addr1,
@@ -160,8 +165,8 @@ describe('SAccount contract', () => {
       });
 
       const userOp: UserOperation = signUserOp(unsignedUserOp, wallet, sEntryPoint.address, chainId);
-      const userOpHash = await getUserOpHash(userOp, sEntryPoint.address, chainId);
-      console.log(wallet.address, userOpHash);
+      // const userOpHash = await getUserOpHash(userOp, sEntryPoint.address, chainId);
+      // console.log(wallet.address, userOpHash);
 
       // const result = await sAccount.connect(addr1).validateUserOp({ ...userOp, nonce: 1 }, userOpHash, 0);
       try {
@@ -191,10 +196,10 @@ describe('SAccount contract', () => {
       const testWallet = createAccountOwner(1);
 
       await owner.sendTransaction({ to: sAccount.address, value: ONE_ETH });
-      console.log(`sAccount (${sAccount.address}) balance: `, await getBalance(provider, sAccount.address));
-      console.log(`testWallet (${testWallet.address}) balance: `, await getBalance(provider, testWallet.address));
-      console.log('Add sAccount operator with address: ', wallet.address);
+      // console.log(`sAccount (${sAccount.address}) balance: `, await getBalance(provider, sAccount.address));
+      // console.log(`testWallet (${testWallet.address}) balance: `, await getBalance(provider, testWallet.address));
 
+      // console.log('Add sAccount operator with address: ', wallet.address);
       await expect(sAccount.connect(owner).updateOperator(wallet.address, true))
         .to.emit(sAccount, 'OperatorListChanged').withArgs(wallet.address, true);
 
@@ -230,17 +235,25 @@ describe('SAccount contract', () => {
     it('Should validate op and transfer RDR', async () => {
       // transaction - validate - execute - emit event
       const {
-        sAccount, sEntryPoint, owner, provider,
+        sAccount, sEntryPoint, owner, provider, rdrToken,
       } = await loadFixture(deploySAccountFixture);
 
       const wallet = createAccountOwner(0);
       const testWallet = createAccountOwner(1);
 
-      await owner.sendTransaction({ to: sAccount.address, value: ONE_ETH });
-      console.log(`sAccount (${sAccount.address}) balance: `, await getBalance(provider, sAccount.address));
-      console.log(`testWallet (${testWallet.address}) balance: `, await getBalance(provider, testWallet.address));
-      console.log('Add sAccount operator with address: ', wallet.address);
+      // Transfer 50 tokens from owner to sAccount
+      await expect(rdrToken.transfer(sAccount.address, 50))
+        .to.emit(rdrToken, 'Transfer').withArgs(owner.address, sAccount.address, 50);
 
+      // console.log(`sAccount (${sAccount.address}) balance: `, await rdrToken.balanceOf(sAccount.address), 'RDR');
+      // console.log(`testWallet (${testWallet.address}) balance: `, await rdrToken.balanceOf(testWallet.address), 'RDR');
+
+      // console.log(`sAccount (${sAccount.address}) balance: `, await getBalance(provider, sAccount.address), 'ETH');
+      // console.log(`owner (${owner.address}) balance: `, await getBalance(provider, owner.address), 'ETH');
+      // console.log(`SEntryPoint (${sEntryPoint.address}) balance: `, await getBalance(provider, sEntryPoint.address), 'ETH');
+
+      // console.log('RDR address: ', rdrToken.address);
+      // console.log('Add sAccount operator with address: ', wallet.address);
       await expect(sAccount.connect(owner).updateOperator(wallet.address, true))
         .to.emit(sAccount, 'OperatorListChanged').withArgs(wallet.address, true);
 
@@ -249,7 +262,8 @@ describe('SAccount contract', () => {
       const maxFeePerGas = 3e9;
       const chainId = await ethers.provider.getNetwork().then((net) => net.chainId);
 
-      const callData = sAccount.interface.encodeFunctionData('execute', [testWallet.address, parseEther('0.1'), '0x']);
+      const transferCallData = rdrToken.interface.encodeFunctionData('transfer', [testWallet.address, 10]);
+      const callData = sAccount.interface.encodeFunctionData('execute', [rdrToken.address, parseEther('0'), transferCallData]);
       const nonce = await sAccount.getNonce();
       const unsignedUserOp = fillUserOpDefaults({
         sender: sAccount.address,
@@ -264,13 +278,20 @@ describe('SAccount contract', () => {
       // const userOpHash = await getUserOpHash(userOp, sEntryPoint.address, chainId);
       // console.log('Try to run userOp, hash: ', userOpHash, userOp, 'owner: ', owner.address);
 
-      await sEntryPoint.connect(owner).handleOps([userOp], AddressZero);
-      const newBalanceSAccount = await getBalance(provider, sAccount.address);
-      const newBalanceTestWallet = await getBalance(provider, testWallet.address);
-      console.log(`sAccount (${sAccount.address}) balance: `, newBalanceSAccount, ' Test wallet new balance: ', newBalanceTestWallet);
+      const tx = await sEntryPoint.connect(owner).handleOps([userOp], AddressZero);
+      await tx.wait();
+      // console.log(result);
 
-      expect(newBalanceSAccount).to.equal('0.9');
-      expect(newBalanceTestWallet).to.equal('0.1');
+      const newBalanceSAccount = (await rdrToken.balanceOf(sAccount.address)).toString();
+      const newBalanceTestWallet = (await rdrToken.balanceOf(testWallet.address)).toString();
+      // console.log(`sAccount (${sAccount.address})  balance: `, newBalanceSAccount, 'RDR   Test wallet new balance: ', newBalanceTestWallet, 'RDR');
+
+      // console.log(`sAccount (${sAccount.address}) balance: `, await getBalance(provider, sAccount.address), 'ETH');
+      // console.log(`owner (${owner.address}) balance: `, await getBalance(provider, owner.address), 'ETH');
+      // console.log(`SEntryPoint (${sEntryPoint.address}) balance: `, await getBalance(provider, sEntryPoint.address), 'ETH');
+
+      expect(newBalanceSAccount).to.equal('40');
+      expect(newBalanceTestWallet).to.equal('10');
     });
   });
 });

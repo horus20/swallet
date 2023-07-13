@@ -52,7 +52,7 @@ contract SAccount is Operator, BaseAccount, TokenCallbackHandler, UUPSUpgradeabl
     function execute(address dest, uint256 value, bytes calldata func) external {
         _requireFromEntryPointOrOwner();
 
-        console.log("execute: %s %s", dest, value);
+        // console.log("execute: %s %s", dest, value);
         _call(dest, value, func);
     }
 
