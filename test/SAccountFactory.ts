@@ -1,16 +1,15 @@
 import { ethers } from 'hardhat';
 
-import { parseEther } from 'ethers/lib/utils';
 import {
-  createAccountOwner, fillAndSign, fillUserOpDefaults, getAccountInitCode, getBalance, getUserOpHash, ONE_ETH, signUserOp,
+  createAccountOwner, fillUserOpDefaults, signUserOp,
 } from './UserOp';
 import { UserOperation } from './UserOperation';
 
 const { expect } = require('chai');
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
 
-describe('SAccount contract', () => {
-  async function deploySAccountFixture() {
+describe('SAccount factory contract', () => {
+  async function deployFixture() {
     // Get the ContractFactory and Signers here.
     const sAccountContract = await ethers.getContractFactory('SAccount');
     const sEntryPointContract = await ethers.getContractFactory('SEntryPoint');
@@ -42,38 +41,22 @@ describe('SAccount contract', () => {
   }
 
   describe('Transactions', () => {
-    it('should deploy account', async () => {
+    it('should deploy and test accounts', async () => {
       const {
         sEntryPoint, owner, sAccountFactory, sAccount,
-      } = await loadFixture(deploySAccountFixture);
-
-      /* const wallet = createAccountOwner(0);
-
-      const callGasLimit = 2000000;
-      const verificationGasLimit = 1000000;
-
-      const initCode = getAccountInitCode(sAccountFactory, sEntryPoint.address);
-      const sender = await sEntryPoint.callStatic.getSenderAddress(initCode).catch((e) => e.errorArgs.sender);
-      console.log(initCode, sender);
-
-      const op = await fillAndSign({
-        sender,
-        initCode,
-        callGasLimit,
-        verificationGasLimit,
-      }, wallet, sEntryPoint);
-
-      await sEntryPoint.connect(owner).simulateValidation(op); */
+      } = await loadFixture(deployFixture);
 
       let tx = await sAccountFactory.connect(owner).createAccount(sEntryPoint.address);
       let receipt = await tx.wait();
       expect(tx).to.emit(sAccountFactory, 'SAccountCreated');
+      // @ts-ignore
       const wallet1address = receipt.events?.filter((x) => x.event === 'SAccountCreated')[0].args[0];
       // console.log(wallet1address);
 
       tx = await sAccountFactory.connect(owner).createAccount(sEntryPoint.address);
       receipt = await tx.wait();
       expect(tx).to.emit(sAccountFactory, 'SAccountCreated');
+      // @ts-ignore
       const wallet2address = receipt.events?.filter((x) => x.event === 'SAccountCreated')[0].args[0];
       // console.log(wallet2address);
 
