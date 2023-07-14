@@ -24,10 +24,17 @@ contract SAddressBook is Operator {
     }
 
     function updateAlias(string calldata addressAlias, address addr, bool active) external {
-        _requireOperator();
-        console.log("size: %s", bytes(addressAlias).length);
+        if (_addressBook[addressAlias].isValue) {
+            _requireOperatorOrAddrOwner(_addressBook[addressAlias].addr);
+        } else {
+            _requireOperatorOrAddrOwner(addr);
+        }
         _validateAlias(addressAlias);
         _updateAlias(addressAlias, addr, active);
+    }
+
+    function _requireOperatorOrAddrOwner(address addr) internal view {
+        require(this.isOperator(msg.sender) || addr == msg.sender, "account: available only for operator or address owner");
     }
 
     function _validateAlias(string calldata addressAlias) internal {
@@ -39,6 +46,7 @@ contract SAddressBook is Operator {
     function _updateAlias(string calldata addressAlias, address addr, bool active) internal {
         if (_addressBook[addressAlias].isValue) {
             if (_addressBook[addressAlias].addr != addr) {
+
                 emit AddressChanged(addressAlias, _addressBook[addressAlias].addr, addr);
             }
             _addressBook[addressAlias].addr = addr;

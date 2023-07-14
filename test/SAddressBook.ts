@@ -13,7 +13,7 @@ describe('SAddressBook contract', () => {
     // Get the ContractFactory and Signers here.
     const sAddressBookContract = await ethers.getContractFactory('SAddressBook');
 
-    const [owner, addr1] = await ethers.getSigners();
+    const [owner, addr1, addr2] = await ethers.getSigners();
 
     const sAddressBook = await sAddressBookContract.deploy(owner.address);
     await sAddressBook.deployed();
@@ -23,13 +23,14 @@ describe('SAddressBook contract', () => {
       sAddressBook,
       owner,
       addr1,
+      addr2,
     };
   }
 
   describe('Transactions', () => {
     it('should deploy account', async () => {
       const {
-        sAddressBook, owner, addr1,
+        sAddressBook, owner, addr1, addr2,
       } = await loadFixture(deployFixture);
 
       const wallet1 = createAccountOwner(0);
@@ -38,12 +39,13 @@ describe('SAddressBook contract', () => {
 
       const label1 = '79008004422';
       const label2 = 'MY_ADDRESS_NE_DOM';
+      const label3 = 'vova';
 
       await expect(sAddressBook.connect(owner).updateAlias(label1, wallet1.address, true))
         .to.emit(sAddressBook, 'AliasChanged').withArgs(label1, wallet1.address, true);
 
       await expect(sAddressBook.connect(addr1).updateAlias(label2, wallet1.address, true))
-        .to.be.revertedWith('account: available only for operator');
+        .to.be.revertedWith('account: available only for operator or address owner');
 
       await expect(sAddressBook.connect(owner).updateOperator(addr1.address, true))
         .to.emit(sAddressBook, 'OperatorListChanged').withArgs(addr1.address, true);
@@ -73,6 +75,28 @@ describe('SAddressBook contract', () => {
 
       await expect(sAddressBook.getAddress(label1))
         .to.be.revertedWith('AA1. Alias not found or non-active');
+
+      await expect(sAddressBook.connect(addr2).updateAlias(label2, addr2.address, true))
+        .to.be.revertedWith('account: available only for operator or address owner');
+
+      await expect(sAddressBook.connect(addr2).updateAlias(label3, addr2.address, true))
+        .to.emit(sAddressBook, 'AliasChanged').withArgs(label3, addr2.address, true);
+
+      let resW3 = await sAddressBook.getAddress(label3);
+      expect(resW3).to.eq(addr2.address);
+
+      await expect(sAddressBook.connect(owner).updateOperator(addr1.address, false))
+        .to.emit(sAddressBook, 'OperatorListChanged').withArgs(addr1.address, false);
+
+      await expect(sAddressBook.connect(addr1).updateAlias(label3, addr1.address, true))
+        .to.be.revertedWith('account: available only for operator or address owner');
+
+      await expect(sAddressBook.connect(addr2).updateAlias(label3, addr1.address, true))
+        .to.emit(sAddressBook, 'AliasChanged').withArgs(label3, addr1.address, true)
+        .emit(sAddressBook, 'AddressChanged').withArgs(label3, addr2.address, addr1.address);
+
+      resW3 = await sAddressBook.getAddress(label3);
+      expect(resW3).to.eq(addr1.address);
     });
   });
 });
