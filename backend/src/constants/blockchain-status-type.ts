@@ -1,0 +1,7 @@
+export enum BlockchainStatusType {
+  NEW = 'NEW',
+  WAITING_SENDING = 'WAITING_SENDING',
+  WAITING_BLOCKCHAIN = 'WAITING_BLOCKCHAIN',
+  DONE = 'DONE',
+  ERROR = 'ERROR',
+}

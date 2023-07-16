@@ -3,7 +3,7 @@ services:
   app:
     env_file:
       - .env
-    container_name: awesome_nest_boilerplate
+    container_name: swallet_backend
     restart: always
     build: .
     ports:

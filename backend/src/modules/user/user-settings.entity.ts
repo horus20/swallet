@@ -9,8 +9,6 @@ import type { IUserEntity } from './user.entity';
 import { UserEntity } from './user.entity';
 
 export interface IUserSettingsEntity extends IAbstractEntity<UserDto> {
-  isEmailVerified?: boolean;
-
   isPhoneVerified?: boolean;
 
   user?: IUserEntity;
@@ -22,9 +20,6 @@ export class UserSettingsEntity
   extends AbstractEntity<UserDto, UserDtoOptions>
   implements IUserSettingsEntity
 {
-  @Column({ default: false })
-  isEmailVerified?: boolean;
-
   @Column({ default: false })
   isPhoneVerified?: boolean;
 

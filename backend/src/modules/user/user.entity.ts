@@ -9,23 +9,14 @@ import type { UserDtoOptions } from './dtos/user.dto';
 import { UserDto } from './dtos/user.dto';
 import type { IUserSettingsEntity } from './user-settings.entity';
 import { UserSettingsEntity } from './user-settings.entity';
+import { AccountEntity } from "../account/account.entity";
 
 export interface IUserEntity extends IAbstractEntity<UserDto> {
-  firstName?: string;
-
-  lastName?: string;
-
   role: RoleType;
-
-  email?: string;
 
   password?: string;
 
   phone?: string;
-
-  avatar?: string;
-
-  fullName?: string;
 
   settings?: IUserSettingsEntity;
 }
@@ -36,33 +27,21 @@ export class UserEntity
   extends AbstractEntity<UserDto, UserDtoOptions>
   implements IUserEntity
 {
-  @Column({ nullable: true })
-  firstName?: string;
-
-  @Column({ nullable: true })
-  lastName?: string;
-
   @Column({ type: 'enum', enum: RoleType, default: RoleType.USER })
   role: RoleType;
-
-  @Column({ unique: true, nullable: true })
-  email?: string;
 
   @Column({ nullable: true })
   password?: string;
 
-  @Column({ nullable: true })
-  phone?: string;
-
-  @Column({ nullable: true })
-  avatar?: string;
-
-  @VirtualColumn()
-  fullName?: string;
+  @Column({ unique: true, nullable: false })
+  phone: string;
 
   @OneToOne(() => UserSettingsEntity, (userSettings) => userSettings.user)
   settings?: UserSettingsEntity;
 
   @OneToMany(() => PostEntity, (postEntity) => postEntity.user)
   posts: PostEntity[];
+
+  @OneToMany(() => AccountEntity, (accountEntity) => accountEntity.user)
+  accounts: AccountEntity[];
 }

@@ -14,12 +14,14 @@ import { PostModule } from './modules/post/post.module';
 import { UserModule } from './modules/user/user.module';
 import { ApiConfigService } from './shared/services/api-config.service';
 import { SharedModule } from './shared/shared.module';
+import { AccountModule } from "./modules/account/account.module";
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
     PostModule,
+    AccountModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

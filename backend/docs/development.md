@@ -41,7 +41,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
-DB_DATABASE=nest_boilerplate
+DB_DATABASE=swallet
 ```
 
 Some helper script to work with database
@@ -70,7 +70,7 @@ DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=mysql
 DB_PASSWORD=mysql
-DB_DATABASE=nest_boilerplate
+DB_DATABASE=swallet
 DB_ROOT_PASSWORD=mysql
 DB_ALLOW_EMPTY_PASSWORD=yes
 ```
@@ -172,4 +172,4 @@ user: postgres
 pass: postgres
 ```
 
-create database `nest_boilerplate` and your application fully is ready to use.
+create database `swallet` and your application fully is ready to use.

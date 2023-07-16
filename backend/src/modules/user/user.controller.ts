@@ -36,7 +36,7 @@ export class UserController {
     );
 
     return {
-      text: `${translation} ${user.firstName}`,
+      text: `${translation} ${user.phone}`,
     };
   }
 

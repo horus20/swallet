@@ -278,6 +278,9 @@ describe('SAccount contract', () => {
       // const userOpHash = await getUserOpHash(userOp, sEntryPoint.address, chainId);
       // console.log('Try to run userOp, hash: ', userOpHash, userOp, 'owner: ', owner.address);
 
+      //console.log(`sAccount (${sAccount.address}) balance: `, await rdrToken.balanceOf(sAccount.address), 'RDR');
+      //await sEntryPoint.connect(owner).simulateHandleOp(userOp, sAccount.address, callData);
+
       const tx = await sEntryPoint.connect(owner).handleOps([userOp], AddressZero);
       await tx.wait();
       // console.log(result);
