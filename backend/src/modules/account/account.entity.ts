@@ -6,6 +6,7 @@ import { UserEntity } from '../user/user.entity';
 import { AccountDto } from './dto/account.dto';
 import { BlockchainStatusType } from "../../constants/blockchain-status-type";
 import { KeyEntity } from "./key.entity";
+import { OpEntity } from "./op.entity";
 
 @Entity({ name: 'accounts' })
 @UseDto(AccountDto)
@@ -37,4 +38,7 @@ export class AccountEntity extends AbstractEntity<AccountDto> {
 
   @OneToMany(() => KeyEntity, (keyEntity) => keyEntity.account)
   keys?: KeyEntity[];
+
+  @OneToMany(() => OpEntity, (opEntity) => opEntity.account)
+  operations?: KeyEntity[];
 }

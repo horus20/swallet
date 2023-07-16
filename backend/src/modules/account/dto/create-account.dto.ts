@@ -1,4 +1,4 @@
-import { StringField } from "../../../decorators";
+import { StringField, StringFieldOptional } from "../../../decorators";
 
 export class CreateAccountDto {
   @StringField()
@@ -7,6 +7,6 @@ export class CreateAccountDto {
   @StringField()
   secret: string;
 
-  @StringField()
-  key: string;
+  @StringFieldOptional()
+  key?: string;
 }
