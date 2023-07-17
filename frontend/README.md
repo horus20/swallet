@@ -1,158 +1,88 @@
-# Real World Vue.js Boilerplate
-This project based on real world practice and ready to use. Have a fun!
+<p align='center'>
+  <img src='https://user-images.githubusercontent.com/11247099/111864893-a457fd00-899e-11eb-9f05-f4b88987541d.png' alt='Vitesse - Opinionated Vite Starter Template' width='600'/>
+</p>
+
+<h6 align='center'>
+<a href="https://vitesse-lite.netlify.app/">Live Demo</a>
+</h6>
+
+<h5 align='center'>
+<b>Lightweight version of <a href="https://github.com/antfu/vitesse">Vitesse</a></b>
+</h5>
+
+<br>
+
+<p align='center'>
+<b>English</b> | <a href="https://github.com/antfu/vitesse-lite/blob/main/README.zh-CN.md">简体中文</a>
+<!-- Contributors: Thanks for geting interested, however we DON'T accept new transitions to the README, thanks. -->
+</p>
 
 ## Features
-- Http request class that implements API calls with Auth and tokens refresh based on Axios
-- Data access layer/API calls
-- Response wrapper/Response error wrapper
-- Base common and layout components
-- Some help mixins
-- Vue CLI v4
-- Developed to work with: https://github.com/zmts/supra-api-nodejs
 
-## Project structure
-- [`src`](#src)
-  - [`assets`](#assets)
-  - [`components`](#components)
-  - [`config`](#config)
-  - [`directives`](#directives)
-  - [`layout`](#layout)
-  - [`mixins`](#mixins)
-  - [`pages`](#pages)
-  - [`plugins`](#plugins)
-  - [`router`](#router)
-  - [`scss`](#scss)
-  - [`services`](#services)
-  - [`store`](#store)
-  - [`.env.js`](#envjs)
-  - [`main.js`](#mainjs)
+- ⚡️ [Vue 3](https://github.com/vuejs/core), [Vite 3](https://github.com/vitejs/vite), [pnpm](https://pnpm.io/), [ESBuild](https://github.com/evanw/esbuild) - born with fastness
 
-### `src`
-Source =)
+- 🗂 [File based routing](./src/pages)
 
-### `assets`
-Images/Fonts/Other media stuff.
+- 📦 [Components auto importing](./src/components)
 
-### `components`
-Shared components folder.
-- `DataBox` wrap in this component any received data. It represents loading(spinloader animation), error and empty statuses (examaple in `src/pages/News.vue`).
-- `UiImgLoader` - `img` tag wrapper. Shows image loading(pulseloader animation) status and animate onloading as option.
-- `UiModal` - simple modal window.
-- `PulseLoading` and `SpinnerWave` - loading animation.
-- `UiUploadMulti` and `UiUploadSingle` - file upload example components.
-- ...
+- 🎨 [UnoCSS](https://github.com/antfu/unocss) - The instant on-demand atomic CSS engine.
 
-### `config`
-App config files. Each category in separate file.
+- 😃 Use icons from any icon sets in [Pure CSS](https://github.com/antfu/unocss/tree/main/packages/preset-icons)
 
-### `directives`
-- Handy debounce directive
+- 🔥 Use the [new `<script setup>` style](https://github.com/vuejs/rfcs/pull/227)
 
-### `layout`
-Base app layout components.
-- `Header`, `Footer` components and main layout wrapper.
+- ✅ Use [Vitest](http://vitest.dev/) for unit and components testing
 
-### `mixins`
-- One method/prop per file principle.
-- Name files same as method/prop.
-- `currentUser` - Includes current user object from store. Global.
-- `formatDateTime` - Datetime moment formatters. Global.
-- `jumpTo` - Help jump to some DOM element. Global.
-- `prepareFetchParamsMixin` - Prepare params for data fetching (examaple in `src/pages/News.vue`).
-- `prepareQueryParamsMixin` - Prepare params for setting it in URL (examaple in `src/pages/News.vue`).
-- `setModelMixin` - Use to set same fields from response that declared in front-end model.
+- 🦾 TypeScript, of course
 
-### `pages`
-Page wrapper components(Pages) and Local components.
+- ☁️ Deploy on Netlify, zero-config
 
-### `plugins`
-- `globalEventBus` - $bus.
 
-### `router`
-Router instance and routing declaration.
-- `index` - router initialization.
-- `routes` - routing.
-- `middlewares`:
-  - `initCurrentUserStateMiddleware` - Current user state initialization (each time app loads, check refresh token and fetch current user if token exist.)
-  - `checkAccessMiddleware` - Each time user change route, check permissions to route.
-  - `setPageTitleMiddleware` - Each time user change route, set page title.
-- `util`:
-  - `routePropResolver` - Pass params from URL to component as props (example in `src/router/routes.js`)
+<br>
 
-### `scss`
-Style files(partials, variables, mixins, reset).
+See [Vitesse](https://github.com/antfu/vitesse) for full featureset.
 
-### `services`
-Data access layer/API calls.
-- ES6 API calls classes.
-- API calls must be represented in separate classes (not in vuex action).
-- `auth.service` - Auth methods and API calls.
-- `http.init` - Http request class.
-- `util`:
-  - `ResponseWrapper` - Represent response object.
-  - `ErrorWrapper` - Represent error object.
-  - `clearData` - Uses to clear request data before send it. Helper.
 
-### `store`
-App store with separate modules.
+## Dropped Features from [Vitesse](https://github.com/antfu/vitesse)
 
-### `.env.js`
-Environment variables (add this to git ignore).
+- ~~i18n~~
+- ~~Layouts~~
+- ~~SSG~~
+- ~~PWA~~
+- ~~Markdown~~
 
-### `main.js`
-Root app initialization file.
+## Pre-packed
 
-### How to declare global SCSS variables/mixins etc... ?
-In `/build/utils.js` >> `generateLoaders('sass')`
+### UI Frameworks
 
-## Utils/Helpers
+- [UnoCSS](https://github.com/antfu/unocss) - The instant on-demand atomic CSS engine.
 
-### What about debounce ?
+### Icons
+
+- [Iconify](https://iconify.design) - use icons from any icon sets [🔍Icônes](https://icones.netlify.app/)
+- [Pure CSS Icons via UnoCSS](https://github.com/antfu/unocss/tree/main/packages/preset-icons)
+
+### Plugins
+
+- [Vue Router](https://github.com/vuejs/vue-router)
+  - [`vite-plugin-pages`](https://github.com/hannoeru/vite-plugin-pages) - file system based routing
+- [`unplugin-auto-import`](https://github.com/antfu/unplugin-auto-import) - Directly use Vue Composition API and others without importing
+- [`unplugin-vue-components`](https://github.com/antfu/unplugin-vue-components) - components auto import
+- [`unplugin-vue-macros`](https://github.com/sxzz/unplugin-vue-macros) - Explore and extend more macros and syntax sugar to Vue.
+- [VueUse](https://github.com/antfu/vueuse) - collection of useful composition APIs
+
+## Try it now!
+
+### GitHub Template
+
+[Create a repo from this template on GitHub](https://github.com/antfu/vitesse-lite/generate).
+
+### Clone to local
+
+If you prefer to do it manually with the cleaner git history
+
+```bash
+npx degit antfu/vitesse-lite my-vitesse-app
+cd my-vitesse-app
+pnpm i # If you don't have pnpm installed, run: npm install -g pnpm
 ```
-import debounce from '../directives/debounce'
-directives: {
-  debounce
-}
-```
-And use it in a template.
-```
-<input type="text" v-model="name" v-debounce="500" @debounce-change="runSomeMethod">
-```
-
-### Notifications/Toast:
-Just make mutation
-```
-commit('dom/TOAST', { message: 'hello', duration: 2000, type: 'success' })
-```
-
-### Icons/SVG:
-Set up yours svg icons in `src/components/icons/` folder. Modify `UiIconBase.vue` related to yours newly added icons and use it in template.
-```
-<UiIconBase size="40" color="yellow" icon="write"/>
-```
-
-## Build Setup
-``` bash
-# clone repo
-git clone https://github.com/zmts/vuejs-boilerplate.git
-
-# install dependencies
-npm install
-
-# serve with hot reload at localhost:8080
-npm run serve
-
-# build for production with minification
-npm run build
-```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
-
-# Amazing repos where I found some great approaches:
-- https://github.com/sdras/vue-sample-svg-icons
-- https://github.com/MillerRen/vue-boilerplate
-- https://github.com/vuejs-tips/v-debounce
-
-__!!! Project still in progress !!!__
-
-_2017 - 2018 - 2019 - 2020 ..._
