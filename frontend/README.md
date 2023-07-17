@@ -1,38 +1,158 @@
-# Sample React Dapp
+# Real World Vue.js Boilerplate
+This project based on real world practice and ready to use. Have a fun!
 
-This directory has a sample Dapp to interact with your contracts, built using
-React.
+## Features
+- Http request class that implements API calls with Auth and tokens refresh based on Axios
+- Data access layer/API calls
+- Response wrapper/Response error wrapper
+- Base common and layout components
+- Some help mixins
+- Vue CLI v4
+- Developed to work with: https://github.com/zmts/supra-api-nodejs
 
-## Running the Dapp
+## Project structure
+- [`src`](#src)
+  - [`assets`](#assets)
+  - [`components`](#components)
+  - [`config`](#config)
+  - [`directives`](#directives)
+  - [`layout`](#layout)
+  - [`mixins`](#mixins)
+  - [`pages`](#pages)
+  - [`plugins`](#plugins)
+  - [`router`](#router)
+  - [`scss`](#scss)
+  - [`services`](#services)
+  - [`store`](#store)
+  - [`.env.js`](#envjs)
+  - [`main.js`](#mainjs)
 
-This project uses [`create-react-app`](https://create-react-app.dev/), so most
-configuration files are handled by it.
+### `src`
+Source =)
 
-To run it, you just need to execute `npm start` in a terminal, and open
-[http://localhost:3000](http://localhost:3000).
+### `assets`
+Images/Fonts/Other media stuff.
 
-To learn more about what `create-react-app` offers, you can read
-[its documentation](https://create-react-app.dev/docs/getting-started).
+### `components`
+Shared components folder.
+- `DataBox` wrap in this component any received data. It represents loading(spinloader animation), error and empty statuses (examaple in `src/pages/News.vue`).
+- `UiImgLoader` - `img` tag wrapper. Shows image loading(pulseloader animation) status and animate onloading as option.
+- `UiModal` - simple modal window.
+- `PulseLoading` and `SpinnerWave` - loading animation.
+- `UiUploadMulti` and `UiUploadSingle` - file upload example components.
+- ...
 
-## Architecture of the Dapp
+### `config`
+App config files. Each category in separate file.
 
-This Dapp consists of multiple React Components, which you can find in
-`src/components`.
+### `directives`
+- Handy debounce directive
 
-Most of them are presentational components, have no logic, and just render HTML.
+### `layout`
+Base app layout components.
+- `Header`, `Footer` components and main layout wrapper.
 
-The core functionality is implemented in `src/components/Dapp.js`, which has
-examples of how to connect to the user's wallet, initialize your Ethereum
-connection and contracts, read from the contract's state, and send transactions.
+### `mixins`
+- One method/prop per file principle.
+- Name files same as method/prop.
+- `currentUser` - Includes current user object from store. Global.
+- `formatDateTime` - Datetime moment formatters. Global.
+- `jumpTo` - Help jump to some DOM element. Global.
+- `prepareFetchParamsMixin` - Prepare params for data fetching (examaple in `src/pages/News.vue`).
+- `prepareQueryParamsMixin` - Prepare params for setting it in URL (examaple in `src/pages/News.vue`).
+- `setModelMixin` - Use to set same fields from response that declared in front-end model.
 
-You can use the `Dapp` component as a starting point for your project. It has
-comments explaining each part of its code, and indicating what's specific to
-this project, and what can be reused.
+### `pages`
+Page wrapper components(Pages) and Local components.
 
-## Getting help and news
+### `plugins`
+- `globalEventBus` - $bus.
 
-If you need help with this project or with Hardhat in general, please read [this guide](https://hardhat.org/hardhat-runner/docs/guides/getting-help) to learn where and how to get it.
+### `router`
+Router instance and routing declaration.
+- `index` - router initialization.
+- `routes` - routing.
+- `middlewares`:
+  - `initCurrentUserStateMiddleware` - Current user state initialization (each time app loads, check refresh token and fetch current user if token exist.)
+  - `checkAccessMiddleware` - Each time user change route, check permissions to route.
+  - `setPageTitleMiddleware` - Each time user change route, set page title.
+- `util`:
+  - `routePropResolver` - Pass params from URL to component as props (example in `src/router/routes.js`)
 
-[Follow us on Twitter](https://twitter.com/HardhatHQ) to get the latest news about Hardhat, and don't forget to star [our GitHub repository](https://github.com/NomicFoundation/hardhat)!
+### `scss`
+Style files(partials, variables, mixins, reset).
 
-**Happy _building_!**
+### `services`
+Data access layer/API calls.
+- ES6 API calls classes.
+- API calls must be represented in separate classes (not in vuex action).
+- `auth.service` - Auth methods and API calls.
+- `http.init` - Http request class.
+- `util`:
+  - `ResponseWrapper` - Represent response object.
+  - `ErrorWrapper` - Represent error object.
+  - `clearData` - Uses to clear request data before send it. Helper.
+
+### `store`
+App store with separate modules.
+
+### `.env.js`
+Environment variables (add this to git ignore).
+
+### `main.js`
+Root app initialization file.
+
+### How to declare global SCSS variables/mixins etc... ?
+In `/build/utils.js` >> `generateLoaders('sass')`
+
+## Utils/Helpers
+
+### What about debounce ?
+```
+import debounce from '../directives/debounce'
+directives: {
+  debounce
+}
+```
+And use it in a template.
+```
+<input type="text" v-model="name" v-debounce="500" @debounce-change="runSomeMethod">
+```
+
+### Notifications/Toast:
+Just make mutation
+```
+commit('dom/TOAST', { message: 'hello', duration: 2000, type: 'success' })
+```
+
+### Icons/SVG:
+Set up yours svg icons in `src/components/icons/` folder. Modify `UiIconBase.vue` related to yours newly added icons and use it in template.
+```
+<UiIconBase size="40" color="yellow" icon="write"/>
+```
+
+## Build Setup
+``` bash
+# clone repo
+git clone https://github.com/zmts/vuejs-boilerplate.git
+
+# install dependencies
+npm install
+
+# serve with hot reload at localhost:8080
+npm run serve
+
+# build for production with minification
+npm run build
+```
+
+For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
+# Amazing repos where I found some great approaches:
+- https://github.com/sdras/vue-sample-svg-icons
+- https://github.com/MillerRen/vue-boilerplate
+- https://github.com/vuejs-tips/v-debounce
+
+__!!! Project still in progress !!!__
+
+_2017 - 2018 - 2019 - 2020 ..._
