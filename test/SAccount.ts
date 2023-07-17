@@ -1,4 +1,4 @@
-import { ethers } from 'hardhat';
+import { artifacts, ethers } from "hardhat";
 
 import { parseEther } from 'ethers/lib/utils';
 import { UserOperation } from './UserOperation';
@@ -29,6 +29,9 @@ describe('SAccount contract', () => {
 
     const sAccount = await sAccountContract.deploy(sEntryPoint.address);
     await sAccount.deployed();
+
+    // const cArtifact = artifacts.readArtifactSync('SAccount');
+    // console.log(JSON.stringify(cArtifact));
 
     const rdrToken = await Token.deploy();
     await rdrToken.deployed();
@@ -223,7 +226,9 @@ describe('SAccount contract', () => {
       // const userOpHash = await getUserOpHash(userOp, sEntryPoint.address, chainId);
       // console.log('Try to run userOp, hash: ', userOpHash, userOp, 'owner: ', owner.address);
 
-      await sEntryPoint.connect(owner).handleOps([userOp], AddressZero);
+      const tx = await sEntryPoint.connect(owner).handleOps([userOp], AddressZero);
+      const receipt = await tx.wait();
+
       const newBalanceSAccount = await getBalance(provider, sAccount.address);
       const newBalanceTestWallet = await getBalance(provider, testWallet.address);
       // console.log(`sAccount (${sAccount.address}) balance: `, newBalanceSAccount, ' Test wallet new balance: ', newBalanceTestWallet);
@@ -262,7 +267,7 @@ describe('SAccount contract', () => {
       const maxFeePerGas = 3e9;
       const chainId = await ethers.provider.getNetwork().then((net) => net.chainId);
 
-      const transferCallData = rdrToken.interface.encodeFunctionData('transfer', [testWallet.address, 10]);
+      const transferCallData = rdrToken.interface.encodeFunctionData('transfer', [testWallet.address, 51]);
       const callData = sAccount.interface.encodeFunctionData('execute', [rdrToken.address, parseEther('0'), transferCallData]);
       const nonce = await sAccount.getNonce();
       const unsignedUserOp = fillUserOpDefaults({
@@ -282,8 +287,8 @@ describe('SAccount contract', () => {
       //await sEntryPoint.connect(owner).simulateHandleOp(userOp, sAccount.address, callData);
 
       const tx = await sEntryPoint.connect(owner).handleOps([userOp], AddressZero);
-      await tx.wait();
-      // console.log(result);
+      const result = await tx.wait();
+      console.log(result);
 
       const newBalanceSAccount = (await rdrToken.balanceOf(sAccount.address)).toString();
       const newBalanceTestWallet = (await rdrToken.balanceOf(testWallet.address)).toString();

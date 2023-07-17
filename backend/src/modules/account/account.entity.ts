@@ -23,6 +23,9 @@ export class AccountEntity extends AbstractEntity<AccountDto> {
   @Column({ type: 'enum', enum: BlockchainStatusType, default: BlockchainStatusType.NEW })
   status: BlockchainStatusType;
 
+  @Column({nullable: true})
+  address: string;
+
   @Column({ default: false})
   isRemoved?: boolean;
 

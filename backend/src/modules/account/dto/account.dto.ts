@@ -17,6 +17,9 @@ export class AccountDto extends AbstractDto {
   @ApiPropertyOptional()
   hash?: string;
 
+  @ApiPropertyOptional()
+  address?: string;
+
   @ApiPropertyOptional({ type: KeyDto, isArray: true })
   keys?: KeyDto[]
 
@@ -27,6 +30,7 @@ export class AccountDto extends AbstractDto {
     this.secret = accountEntity.secret;
     this.status = accountEntity.status;
     this.hash = accountEntity.hash;
+    this.address = accountEntity.address;
 
     this.keys = accountEntity.keys?.map(key => key.toDto());
   }

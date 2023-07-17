@@ -57,7 +57,7 @@ contract SAddressBook is Operator {
         emit AliasChanged(addressAlias, addr, active);
     }
 
-    function getAddress(string calldata addressAlias) external view returns (address) {
+    function getAddressByAlias(string calldata addressAlias) external view returns (address) {
         if (_addressBook[addressAlias].isValue && _addressBook[addressAlias].active) {
             return _addressBook[addressAlias].addr;
         }

@@ -17,6 +17,7 @@ import { KeyService } from "./key.service";
 import { CreateKeyDto } from "./dto/create-key.dto";
 import { CreateOpDto } from "./dto/create-op.dto";
 import { OpService } from "./op.service";
+import { BlockchainStatusType } from "../../constants/blockchain-status-type";
 
 @Injectable()
 export class AccountService {
@@ -74,6 +75,26 @@ export class AccountService {
     }
 
     return account;
+  }
+
+  async getByStatus(status: BlockchainStatusType): Promise<AccountEntity[]> {
+    const queryBuilder = this.accountRepository
+      .createQueryBuilder('account')
+      .where('account.status = :status', { status })
+      .andWhere('account.isRemoved = false');
+
+    return queryBuilder.getMany();
+  }
+
+  async update(account: AccountEntity,  updateParams: Object): Promise<AccountEntity> {
+    this.accountRepository.merge(account, updateParams);
+    return this.accountRepository.save(account);
+  }
+
+  async updateStatus(account: AccountEntity,  status: BlockchainStatusType): Promise<AccountEntity> {
+    return this.update(account, {
+      status,
+    })
   }
 
   async createKey(

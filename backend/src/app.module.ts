@@ -15,6 +15,7 @@ import { UserModule } from './modules/user/user.module';
 import { ApiConfigService } from './shared/services/api-config.service';
 import { SharedModule } from './shared/shared.module';
 import { AccountModule } from "./modules/account/account.module";
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { AccountModule } from "./modules/account/account.module";
       inject: [ApiConfigService],
     }),
     HealthCheckerModule,
+    ScheduleModule.forRoot(),
   ],
   providers: [],
 })

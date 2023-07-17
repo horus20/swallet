@@ -61,4 +61,23 @@ export class OpService {
 
     return this.getOp(id);
   }
+
+  async getByStatus(status: BlockchainStatusType): Promise<OpEntity[]> {
+    const queryBuilder = this.opRepository
+      .createQueryBuilder('op')
+      .where('op.status = :status', { status });
+
+    return queryBuilder.getMany();
+  }
+
+  async update(account: OpEntity,  updateParams: Object): Promise<OpEntity> {
+    this.opRepository.merge(account, updateParams);
+    return this.opRepository.save(account);
+  }
+
+  async updateStatus(account: OpEntity,  status: BlockchainStatusType): Promise<OpEntity> {
+    return this.update(account, {
+      status,
+    })
+  }
 }

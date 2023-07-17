@@ -2,6 +2,9 @@
 // yours, or create new ones.
 
 const path = require("path");
+const { createAccountOwner, ONE_ETH, getBalance } = require("../test/UserOp");
+const { parseEther } = require("ethers/lib/utils");
+const { ethers } = require("hardhat");
 
 async function main() {
   // This is just a convenience check
@@ -20,19 +23,49 @@ async function main() {
     await deployer.getAddress()
   );
 
+  const { provider } = ethers;
+  let owner = createAccountOwner(0);
+  owner = owner.connect(provider);
+  await deployer.sendTransaction({ to: owner.address, value: parseEther('10') });
+
   console.log("Account balance:", (await deployer.getBalance()).toString());
+  console.log(`Owner (${owner.address}) balance: `, (await getBalance(provider, owner.address)) );
+  console.log('Private key: ', owner.privateKey);
 
-  const Token = await ethers.getContractFactory("Token");
-  const token = await Token.deploy();
-  await token.deployed();
-
-  console.log("Token address:", token.address);
-
+  let name = 'DigitalRuble';
+  let Contract = await ethers.getContractFactory(name);
+  let contract = await Contract.deploy();
+  await contract.deployed();
+  console.log(`${name}=${contract.address}`);
   // We also save the contract's artifacts and address in the frontend directory
-  saveFrontendFiles(token);
+  saveFrontendFiles(contract, name);
+
+  name = 'SAddressBook';
+  Contract = await ethers.getContractFactory(name);
+  contract = await Contract.deploy(owner.address);
+  await contract.deployed();
+  console.log(`${name}=${contract.address}`);
+  // We also save the contract's artifacts and address in the frontend directory
+  saveFrontendFiles(contract, name);
+
+  name = 'SEntryPoint';
+  Contract = await ethers.getContractFactory(name);
+  const entryPoint = await Contract.deploy(owner.address);
+  await entryPoint.deployed();
+  console.log(`${name}=${entryPoint.address}`);
+  // We also save the contract's artifacts and address in the frontend directory
+  saveFrontendFiles(entryPoint, name);
+
+  name = 'SAccountFactory';
+  Contract = await ethers.getContractFactory(name);
+  contract = await Contract.deploy();
+  await contract.deployed();
+  console.log(`${name}=${contract.address}`);
+  // We also save the contract's artifacts and address in the frontend directory
+  saveFrontendFiles(contract, name);
 }
 
-function saveFrontendFiles(token) {
+function saveFrontendFiles(contract, name) {
   const fs = require("fs");
   const contractsDir = path.join(__dirname, "..", "frontend", "src", "contracts");
 
@@ -41,15 +74,15 @@ function saveFrontendFiles(token) {
   }
 
   fs.writeFileSync(
-    path.join(contractsDir, "contract-address.json"),
-    JSON.stringify({ Token: token.address }, undefined, 2)
+    path.join(contractsDir, `${name}-address.json`),
+    JSON.stringify({ [name]: contract.address }, undefined, 2)
   );
 
-  const TokenArtifact = artifacts.readArtifactSync("Token");
+  const cArtifact = artifacts.readArtifactSync(name);
 
   fs.writeFileSync(
-    path.join(contractsDir, "Token.json"),
-    JSON.stringify(TokenArtifact, null, 2)
+    path.join(contractsDir, `${name}.json`),
+    JSON.stringify(cArtifact, null, 2)
   );
 }
 

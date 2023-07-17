@@ -57,23 +57,23 @@ describe('SAddressBook contract', () => {
         .to.emit(sAddressBook, 'AliasChanged').withArgs(label2, wallet3.address, true)
         .emit(sAddressBook, 'AddressChanged').withArgs(label2, wallet2.address, wallet3.address);
 
-      const resW1 = await sAddressBook.getAddress(label1);
+      const resW1 = await sAddressBook.getAddressByAlias(label1);
       expect(resW1).to.eq(wallet1.address);
 
-      const resW2 = await sAddressBook.getAddress(label2);
+      const resW2 = await sAddressBook.getAddressByAlias(label2);
       expect(resW2).to.eq(wallet3.address);
 
       await expect(sAddressBook.connect(addr1).updateAlias('VERY_LONG_LONG_LOOOO______OOOOOONG_LABEL', wallet1.address, true))
         .to.be.revertedWith('AA0. Alias is too long');
 
-      await expect(sAddressBook.getAddress('00000'))
+      await expect(sAddressBook.getAddressByAlias('00000'))
         .to.be.revertedWith('AA1. Alias not found or non-active');
 
       // disable label1
       await expect(sAddressBook.connect(owner).updateAlias(label1, wallet1.address, false))
         .to.emit(sAddressBook, 'AliasChanged').withArgs(label1, wallet1.address, false);
 
-      await expect(sAddressBook.getAddress(label1))
+      await expect(sAddressBook.getAddressByAlias(label1))
         .to.be.revertedWith('AA1. Alias not found or non-active');
 
       await expect(sAddressBook.connect(addr2).updateAlias(label2, addr2.address, true))
@@ -82,7 +82,7 @@ describe('SAddressBook contract', () => {
       await expect(sAddressBook.connect(addr2).updateAlias(label3, addr2.address, true))
         .to.emit(sAddressBook, 'AliasChanged').withArgs(label3, addr2.address, true);
 
-      let resW3 = await sAddressBook.getAddress(label3);
+      let resW3 = await sAddressBook.getAddressByAlias(label3);
       expect(resW3).to.eq(addr2.address);
 
       await expect(sAddressBook.connect(owner).updateOperator(addr1.address, false))
@@ -95,7 +95,7 @@ describe('SAddressBook contract', () => {
         .to.emit(sAddressBook, 'AliasChanged').withArgs(label3, addr1.address, true)
         .emit(sAddressBook, 'AddressChanged').withArgs(label3, addr2.address, addr1.address);
 
-      resW3 = await sAddressBook.getAddress(label3);
+      resW3 = await sAddressBook.getAddressByAlias(label3);
       expect(resW3).to.eq(addr1.address);
     });
   });

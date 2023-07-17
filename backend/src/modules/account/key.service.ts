@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { KeyEntity } from './key.entity';
 import { BlockchainStatusType } from '../../constants/blockchain-status-type';
+import { AccountEntity } from "./account.entity";
 
 @Injectable()
 export class KeyService {
@@ -42,5 +43,25 @@ export class KeyService {
     });
 
     await this.keyRepository.save(key);
+  }
+
+  async getByStatus(status: BlockchainStatusType): Promise<KeyEntity[]> {
+    const queryBuilder = this.keyRepository
+      .createQueryBuilder('key')
+      .where('key.status = :status', { status })
+      .andWhere('key.isRemoved = false');
+
+    return queryBuilder.getMany();
+  }
+
+  async update(account: KeyEntity,  updateParams: Object): Promise<KeyEntity> {
+    this.keyRepository.merge(account, updateParams);
+    return this.keyRepository.save(account);
+  }
+
+  async updateStatus(account: KeyEntity,  status: BlockchainStatusType): Promise<KeyEntity> {
+    return this.update(account, {
+      status,
+    })
   }
 }

@@ -108,27 +108,8 @@ export class ApiConfigService {
     };
   }
 
-  get awsS3Config() {
-    return {
-      bucketRegion: this.getString('AWS_S3_BUCKET_REGION'),
-      bucketApiVersion: this.getString('AWS_S3_API_VERSION'),
-      bucketName: this.getString('AWS_S3_BUCKET_NAME'),
-    };
-  }
-
   get documentationEnabled(): boolean {
     return this.getBoolean('ENABLE_DOCUMENTATION');
-  }
-
-  get natsEnabled(): boolean {
-    return this.getBoolean('NATS_ENABLED');
-  }
-
-  get natsConfig() {
-    return {
-      host: this.getString('NATS_HOST'),
-      port: this.getNumber('NATS_PORT'),
-    };
   }
 
   get authConfig() {
@@ -137,6 +118,24 @@ export class ApiConfigService {
       publicKey: this.getString('JWT_PUBLIC_KEY'),
       jwtExpirationTime: this.getNumber('JWT_EXPIRATION_TIME'),
     };
+  }
+
+  getBlockchainConfig() {
+    return {
+      privateKey: this.getString('BC_PRIVATE_KEY'),
+      address: this.getString('BC_ADDRESS'),
+      rpc: this.getString('BC_RPC'),
+      token: this.getString('DigitalRuble'),
+      addressBook: this.getString('SAddressBook'),
+      entryPoint: this.getString('SEntryPoint'),
+      accountFactory: this.getString('SAccountFactory'),
+
+      tokenABI: this.getString('DigitalRubleABI'),
+      addressBookABI: this.getString('SAddressBookABI'),
+      entryPointABI: this.getString('SEntryPointABI'),
+      accountFactoryABI: this.getString('SAccountFactoryABI'),
+      accountABI: this.getString('SAccountABI'),
+    }
   }
 
   get appConfig() {

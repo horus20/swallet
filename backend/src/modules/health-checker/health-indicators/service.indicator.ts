@@ -9,7 +9,6 @@ import { timeout } from 'rxjs/operators';
 export class ServiceHealthIndicator extends HealthIndicator {
   constructor(
     @Optional()
-    @Inject('NATS_SERVICE')
     private readonly clientProxy?: ClientProxy,
   ) {
     super();

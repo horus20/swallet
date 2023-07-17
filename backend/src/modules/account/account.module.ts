@@ -7,11 +7,13 @@ import { KeyEntity } from "./key.entity";
 import { KeyService } from "./key.service";
 import { OpEntity } from "./op.entity";
 import { OpService } from "./op.service";
+import { ScheduleModule } from "@nestjs/schedule";
+import { BlockchainService } from "./blockchain.service";
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AccountEntity, KeyEntity, OpEntity])],
-  providers: [AccountService, KeyService, OpService, ],
+  imports: [TypeOrmModule.forFeature([AccountEntity, KeyEntity, OpEntity]), ScheduleModule.forRoot()],
+  providers: [AccountService, KeyService, OpService, BlockchainService, ],
   controllers: [AccountController],
 })
 export class AccountModule {}
