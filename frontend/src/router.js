@@ -39,30 +39,30 @@ export const router = new Router({
       component: () => import('./views/BoardAdmin.vue')
     },
     {
-      path: '/mod',
-      name: 'moderator',
-      // lazy-loaded
-      component: () => import('./views/BoardModerator.vue')
-    },
-    {
       path: '/user',
       name: 'user',
       // lazy-loaded
       component: () => import('./views/BoardUser.vue')
+    },
+    {
+      path: '/account',
+      name: 'account',
+      // lazy-loaded
+      component: () => import('./views/NewAccount.vue')
     }
   ]
 });
 
-// router.beforeEach((to, from, next) => {
-//   const publicPages = ['/login', '/register', '/home'];
-//   const authRequired = !publicPages.includes(to.path);
-//   const loggedIn = localStorage.getItem('user');
+router.beforeEach((to, from, next) => {
+   const publicPages = ['/login', '/register', '/lost'];
+   const authRequired = !publicPages.includes(to.path);
+   const loggedIn = localStorage.getItem('user');
 
-//   // trying to access a restricted page + not logged in
-//   // redirect to login page
-//   if (authRequired && !loggedIn) {
-//     next('/login');
-//   } else {
-//     next();
-//   }
-// });
+   // trying to access a restricted page + not logged in
+   // redirect to login page
+   if (authRequired && !loggedIn) {
+     next('/login');
+   } else {
+     next();
+   }
+});

@@ -1,46 +1,44 @@
 <template>
   <div class="col-md-12">
     <div class="card card-container">
-      <img
-        id="profile-img"
-        src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-        class="profile-img-card"
-      />
-      <form name="form" @submit.prevent="handleLogin">
+      <h5 class="card-title">Создание счета</h5>
+      <form name="form" @submit.prevent="handleCreate">
         <div class="form-group">
-          <label for="phone">Телефон</label>
+          <label for="alias">Публичное имя</label>
           <input
-            v-model="user.phone"
+            v-model="account.alias"
             v-validate="'required'"
             type="text"
             class="form-control"
-            name="phone"
+            name="alias"
           />
+          <small id="aliasHelp" class="form-text text-muted">Публичное имя будет использоваться как идентификатор перевода</small>
           <div
-            v-if="errors.has('phone')"
+            v-if="errors.has('alias')"
             class="alert alert-danger"
             role="alert"
-          >Телефон обязателен!</div>
+          >Публичное имя обязателено!</div>
         </div>
         <div class="form-group">
-          <label for="password">Пароль</label>
+          <label for="secret">Секретное слово</label>
           <input
-            v-model="user.password"
+            v-model="account.secret"
             v-validate="'required'"
-            type="password"
+            type="secret"
             class="form-control"
-            name="password"
+            name="secret"
           />
+          <small id="secretHelp" class="form-text text-muted">Секретное слово необходимо для восстановления доступа</small>
           <div
-            v-if="errors.has('password')"
+            v-if="errors.has('secret')"
             class="alert alert-danger"
             role="alert"
-          >Пароль обязателен!</div>
+          >Секретное слово обязателено!</div>
         </div>
         <div class="form-group">
           <button class="btn btn-primary btn-block" :disabled="loading">
             <span v-show="loading" class="spinner-border spinner-border-sm"></span>
-            <span>Войти</span>
+            <span>Создать</span>
           </button>
         </div>
         <div class="form-group">
@@ -53,28 +51,23 @@
 
 <script>
 import User from '../models/user';
+import Account from "@/models/account";
 
 export default {
-  name: 'Login',
+  name: 'NewAccount',
   data() {
     return {
-      user: new User('', ''),
+      account: new Account(this.$store.state.auth.user.user.phone, ''),
       loading: false,
       message: ''
     };
   },
   computed: {
-    loggedIn() {
-      return this.$store.state.auth.status.loggedIn;
-    }
   },
   created() {
-    if (this.loggedIn) {
-      this.$router.push('/home');
-    }
   },
   methods: {
-    handleLogin() {
+    handleCreate() {
       this.loading = true;
       this.$validator.validateAll().then(isValid => {
         if (!isValid) {
@@ -82,7 +75,7 @@ export default {
           return;
         }
 
-        if (this.user.phone && this.user.password) {
+        if (this.account.secret && this.account.alias) {
           this.$store.dispatch('auth/login', this.user).then(
             () => {
               this.$router.push('/home');

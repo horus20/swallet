@@ -2,11 +2,7 @@ import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/co
 import { CommandBus } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ValidatorService } from '../../shared/services/validator.service';
 import { AccountEntity } from "./account.entity";
-import { CreatePostDto } from "../post/dtos/create-post.dto";
-import { PostEntity } from "../post/post.entity";
-import { CreatePostCommand } from "../post/commands/create-post.command";
 import { CreateAccountDto } from "./dto/create-account.dto";
 import { UserEntity } from "../user/user.entity";
 import { AccountPageOptionsDto } from "./dto/account-page-options.dto";

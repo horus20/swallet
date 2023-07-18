@@ -1,8 +1,20 @@
 <template>
   <div class="container">
-    <header class="jumbotron">
-      <h3>{{content}}</h3>
+    <header v-if="error"  class="jumbotron">
+      <h3 class="error">
+        {{ error }}
+      </h3>
     </header>
+
+
+    <div v-for="account in accounts" class="card">
+    </div>
+
+    <div class="card text-center">
+      <div class="card-body">
+        <router-link to="/account"  class="btn btn-outline-primary">Создать счет</router-link>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -13,16 +25,18 @@ export default {
   name: 'Home',
   data() {
     return {
-      content: ''
+      accounts: [],
+      error: null,
     };
   },
   mounted() {
-    UserService.getPublicContent().then(
+    UserService.getAccounts().then(
       response => {
-        this.content = response.data;
+        console.log(response)
+        this.accounts = response.data.data;
       },
       error => {
-        this.content =
+        this.error =
           (error.response && error.response.data && error.response.data.message) ||
           error.message ||
           error.toString();

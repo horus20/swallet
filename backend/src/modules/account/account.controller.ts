@@ -31,7 +31,7 @@ import { CreateOpDto } from "./dto/create-op.dto";
 import { OpDto } from "./dto/op.dto";
 import { KeyDto } from "./dto/key.dto";
 
-@Controller('accounts')
+@Controller('api/accounts')
 @ApiTags('accounts')
 export class AccountController {
   constructor(

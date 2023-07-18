@@ -4,7 +4,9 @@ The first things you need to do are cloning this repository and installing its
 dependencies:
 
 ```sh
-npm install
+npm install 
+or
+npm install --legacy-peer-deps 
 ```
 
 Once installed, let's run Hardhat's testing network:
@@ -20,3 +22,16 @@ deploy your contract:
 npx hardhat run scripts/deploy.js --network localhost
 ```
 
+### Frontend
+
+```shell
+cd ./frontend
+npm install && npm run serve
+```
+
+### Backend
+
+```sh
+cd ./backend
+npm install && npm run build:prod && npm run start:prod
+```

@@ -73,7 +73,7 @@ export class BlockchainService {
           return;
         }
 
-        const logs = receipt.logs.map((log) => this.accountFactory.interface.parseLog(log)).filter((log) => log != null);
+        let logs = receipt.logs.map((log) => this.accountFactory.interface.parseLog(log)).filter((log) => log != null);
         const walletAddress = logs?.find((log) => log.name === 'SAccountCreated').args[0];
 
         await this.accountService.update(account, {
@@ -90,7 +90,7 @@ export class BlockchainService {
           return;
         }
 
-        const logs = receipt.logs.map((log) => this.addressBook.interface.parseLog(log)).filter((log) => log != null);
+        logs = receipt.logs.map((log) => this.addressBook.interface.parseLog(log)).filter((log) => log != null);
         const result = logs?.find((log) => log.name === 'AliasChanged');
 
         if (!result) {

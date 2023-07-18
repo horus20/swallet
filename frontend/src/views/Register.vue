@@ -9,35 +9,21 @@
       <form name="form" @submit.prevent="handleRegister">
         <div v-if="!successful">
           <div class="form-group">
-            <label for="username">Username</label>
+            <label for="phone">Телефон</label>
             <input
-              v-model="user.username"
+              v-model="user.phone"
               v-validate="'required|min:3|max:20'"
               type="text"
               class="form-control"
-              name="username"
+              name="phone"
             />
             <div
-              v-if="submitted && errors.has('username')"
+              v-if="submitted && errors.has('phone')"
               class="alert-danger"
-            >{{errors.first('username')}}</div>
+            >{{errors.first('phone')}}</div>
           </div>
           <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              v-model="user.email"
-              v-validate="'required|email|max:50'"
-              type="email"
-              class="form-control"
-              name="email"
-            />
-            <div
-              v-if="submitted && errors.has('email')"
-              class="alert-danger"
-            >{{errors.first('email')}}</div>
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
+            <label for="password">Пароль</label>
             <input
               v-model="user.password"
               v-validate="'required|min:6|max:40'"
@@ -51,7 +37,7 @@
             >{{errors.first('password')}}</div>
           </div>
           <div class="form-group">
-            <button class="btn btn-primary btn-block">Sign Up</button>
+            <button class="btn btn-primary btn-block">Регистрация</button>
           </div>
         </div>
       </form>
