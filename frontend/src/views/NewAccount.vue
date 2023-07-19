@@ -50,14 +50,17 @@
 </template>
 
 <script>
-import User from '../models/user';
 import Account from "@/models/account";
+import Vue from "vue";
 
 export default {
   name: 'NewAccount',
   data() {
     return {
-      account: new Account(this.$store.state.auth.user.user.phone, ''),
+      account: new Account(
+        Vue.config.phone,
+        ''
+      ),
       loading: false,
       message: ''
     };
@@ -75,8 +78,8 @@ export default {
           return;
         }
 
-        if (this.account.secret && this.account.alias) {
-          this.$store.dispatch('auth/login', this.user).then(
+        if (this.account.alias && this.account.secret) {
+          this.$store.dispatch('account/newAccount', this.account).then(
             () => {
               this.$router.push('/home');
             },

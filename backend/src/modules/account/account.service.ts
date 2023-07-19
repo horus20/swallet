@@ -36,7 +36,7 @@ export class AccountService {
     });
     await this.accountRepository.save(accountEntity);
 
-    if (!createAccountDto.key) {
+    if (createAccountDto.key != null || typeof createAccountDto.key != 'undefined') {
       await this.keyService.createKey(createAccountDto.key ?? '', accountEntity.id);
     }
 

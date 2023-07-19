@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_URL } from "@/const";
+import Vue from "vue";
 
 class AuthService {
   login(user) {
@@ -11,6 +12,10 @@ class AuthService {
       .then(response => {
         if (response.data.token.accessToken) {
           localStorage.setItem('user', JSON.stringify(response.data));
+          // store password on session for encrypt/decrypt accounts
+          // todo: change this to the input pass for creation
+          Vue.config.password = user.password;
+          Vue.config.phone = user.phone.trim().replace(/\D/g,'');
         }
 
         return response.data;

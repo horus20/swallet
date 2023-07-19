@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <nav class="navbar navbar-expand navbar-light bg-light">
-      <a href class="navbar-brand" href="/">S-Wallet</a>
+      <a class="navbar-brand" href="/">S-Wallet</a>
       <div class="navbar-nav mr-auto">
         <!--<li class="nav-item">
           <router-link to="/home" class="nav-link">
@@ -44,7 +44,7 @@
       </div>
     </nav>
 
-    <div class="container-fluid" style="margin-top: 15px;">
+    <div class="container-fluid">
       <router-view />
     </div>
   </div>
