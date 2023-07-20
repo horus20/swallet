@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
 /* solhint-disable avoid-low-level-calls */
@@ -15,7 +16,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/ISEntryPoint.sol";
 import "./abstract/Operator.sol";
 
-import "hardhat/console.sol"; // todo: remove this
+// import "hardhat/console.sol"; // todo: remove this
 
 contract SEntryPoint is ISEntryPoint, Operator, NonceManager, ReentrancyGuard {
 

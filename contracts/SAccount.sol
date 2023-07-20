@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -8,7 +9,7 @@ import "./abstract/TokenCallbackHandler.sol";
 import "./abstract/Operator.sol";
 import "./interfaces/IEntryPointWithOperator.sol";
 
-import "hardhat/console.sol"; // todo: remove this
+// import "hardhat/console.sol"; // todo: remove this
 /**
   * minimal account.
   *  this is sample minimal account.

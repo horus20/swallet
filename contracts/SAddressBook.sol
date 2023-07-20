@@ -1,8 +1,9 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
 import "./abstract/Operator.sol";
 
-import "hardhat/console.sol"; // todo: remove this
+// import "hardhat/console.sol"; // todo: remove this
 
 contract SAddressBook is Operator {
 
