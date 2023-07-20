@@ -11,7 +11,6 @@ import { AccountEntity } from './account.entity';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UserEntity } from '../user/user.entity';
 import { AccountPageOptionsDto } from './dto/account-page-options.dto';
-import { PageDto } from '../../common/dto/page.dto';
 import { AccountDto } from './dto/account.dto';
 import { KeyEntity } from './key.entity';
 import { KeyService } from './key.service';
@@ -59,18 +58,16 @@ export class AccountService {
   async getUserAccounts(
     userId: Uuid,
     accountPageOptionsDto: AccountPageOptionsDto,
-  ): Promise<PageDto<AccountDto>> {
+  ): Promise<AccountDto[]> {
     try {
       const queryBuilder = this.accountRepository
         .createQueryBuilder('account')
         .leftJoinAndSelect('account.keys', 'key', 'key.isRemoved = false')
         .where('account.user_id = :userId', { userId })
-        .andWhere('account.isRemoved = false');
-      const [items, accountMetaDto] = await queryBuilder.paginate(
-        accountPageOptionsDto,
-      );
+        .andWhere('account.isRemoved = false')
+      const items = await queryBuilder.getMany();
 
-      return items.toPageDto(accountMetaDto);
+      return items.map(item => item.toDto());
     } catch (e) {
       console.error(e);
       throw new InternalServerErrorException(e);

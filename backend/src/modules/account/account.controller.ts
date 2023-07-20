@@ -23,7 +23,6 @@ import { UserEntity } from "../user/user.entity";
 import { AccountDto } from "./dto/account.dto";
 import { CreateAccountDto } from "./dto/create-account.dto";
 import { UseLanguageInterceptor } from "../../interceptors/language-interceptor.service";
-import { PageDto } from "../../common/dto/page.dto";
 import { AccountPageOptionsDto } from "./dto/account-page-options.dto";
 import { CreateKeyDto } from "./dto/create-key.dto";
 import { KeyService } from "./key.service";
@@ -64,7 +63,7 @@ export class AccountController {
   async getAccounts(
     @Query() accountsPageOptionsDto: AccountPageOptionsDto,
     @AuthUser() user: UserEntity,
-  ): Promise<PageDto<AccountDto>> {
+  ): Promise<AccountDto[]> {
     return this.accountService.getUserAccounts(user.id, accountsPageOptionsDto);
   }
 

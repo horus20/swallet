@@ -68,7 +68,7 @@ export default {
     refresh() {
       AccountService.getAccounts().then(
         response => {
-          this.accounts = response.data.data.map(account => {
+          this.accounts = response.data.map(account => {
             account.balance = 0;
             account.hasKey = AccountService.getKeyForAccount(account);
 
