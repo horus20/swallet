@@ -38,7 +38,7 @@ contract SAddressBook is Operator {
         require(this.isOperator(msg.sender) || addr == msg.sender, "account: available only for operator or address owner");
     }
 
-    function _validateAlias(string calldata addressAlias) internal {
+    function _validateAlias(string calldata addressAlias) internal pure {
         if (bytes(addressAlias).length > MAX_ALIAS_SIZE) {
             revert("AA0. Alias is too long");
         }

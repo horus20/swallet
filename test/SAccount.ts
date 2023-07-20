@@ -244,7 +244,8 @@ describe('SAccount contract', () => {
         sAccount, sEntryPoint, owner, provider, rdrToken,
       } = await loadFixture(deploySAccountFixture);
 
-      const wallet = createAccountOwner(0);
+      const wallet = createAccountOwner(48203984023840);
+      console.log(wallet.address, wallet.privateKey, '!!!!!!!!!!!!!!');
       const testWallet = createAccountOwner(1);
 
       // Transfer 50 tokens from owner to sAccount
