@@ -9,7 +9,6 @@ import Vuex from 'vuex';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ethers } from "ethers";
-import * as aes from 'aes-js'
 
 import {
   faHome,
@@ -30,7 +29,6 @@ Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 Vue.use(Vuex);
 Vue.use(ethers);
-Vue.use(aes);
 
 const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545/');
 Vue.config.provider = provider;
