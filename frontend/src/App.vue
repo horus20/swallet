@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <nav class="navbar navbar-expand navbar-light bg-light">
-      <a class="navbar-brand" href="/">S-Wallet</a>
+      <router-link to="/home" class="navbar-brand">S-Wallet</router-link>
       <div class="navbar-nav mr-auto">
         <!--<li class="nav-item">
           <router-link to="/home" class="nav-link">
@@ -51,6 +51,9 @@
 </template>
 
 <script>
+
+import Vue from 'vue';
+
 export default {
   computed: {
     currentUser() {

@@ -59,8 +59,8 @@ export class KeyService {
     return this.keyRepository.save(account);
   }
 
-  async updateStatus(account: KeyEntity,  status: BlockchainStatusType): Promise<KeyEntity> {
-    return this.update(account, {
+  async updateStatus(key: KeyEntity,  status: BlockchainStatusType): Promise<KeyEntity> {
+    return this.update(key, {
       status,
     })
   }

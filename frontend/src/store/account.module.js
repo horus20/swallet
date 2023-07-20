@@ -1,9 +1,7 @@
 import AccountService from '../services/account.service';
 
-const accounts = JSON.parse(localStorage.getItem('accounts'));
-const initialState = accounts
-  ? { accounts }
-  : { accounts: [] };
+// const keys = JSON.parse(localStorage.getItem('keys'));
+const initialState = { accounts: [] };
 
 export const account = {
   namespaced: true,
@@ -21,13 +19,16 @@ export const account = {
         }
       );
     },
+    restore({ commit }, data) {
+      return AccountService.restoreAccount(data.restoreAccount, data.account);
+    }
   },
   mutations: {
     accountSuccess(state, account) {
       state.accounts.push(account);
     },
     accountFailure(state) {
-      console.log(state);
+      // console.log(state);
     },
   }
 };

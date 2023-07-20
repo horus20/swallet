@@ -3,7 +3,7 @@
 
 const path = require("path");
 const { createAccountOwner, ONE_ETH, getBalance } = require("../test/UserOp");
-const { parseEther } = require("ethers/lib/utils");
+const { parseEther, formatEther } = require("ethers/lib/utils");
 const { ethers } = require("hardhat");
 
 async function main() {
@@ -26,7 +26,7 @@ async function main() {
   const { provider } = ethers;
   let owner = createAccountOwner(0);
   owner = owner.connect(provider);
-  await deployer.sendTransaction({ to: owner.address, value: parseEther('10') });
+  await deployer.sendTransaction({ to: owner.address, value: parseEther('100') });
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
   console.log(`Owner (${owner.address}) balance: `, (await getBalance(provider, owner.address)) );
@@ -39,6 +39,10 @@ async function main() {
   console.log(`${name}=${contract.address}`);
   // We also save the contract's artifacts and address in the frontend directory
   saveFrontendFiles(contract, name);
+
+  const tx = await contract.transfer(owner.address, parseEther('1000000'));
+  await tx.wait();
+  console.log(`Operator ${owner.address} balance:`, formatEther(await contract.balanceOf(owner.address)));
 
   name = 'SAddressBook';
   Contract = await ethers.getContractFactory(name);

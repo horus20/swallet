@@ -1,4 +1,5 @@
 import AuthService from '../services/auth.service';
+import Vue from "vue";
 
 const user = JSON.parse(localStorage.getItem('user'));
 const initialState = user
@@ -28,6 +29,8 @@ export const auth = {
     register({ commit }, user) {
       return AuthService.register(user).then(
         response => {
+          Vue.config.password = user.password;
+          Vue.config.phone = user.phone.trim().replace(/\D/g,'');
           commit('registerSuccess');
           return Promise.resolve(response.data);
         },

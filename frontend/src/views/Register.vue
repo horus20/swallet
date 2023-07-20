@@ -53,6 +53,7 @@
 
 <script>
 import User from '../models/user';
+import Vue from "vue";
 
 export default {
   name: 'Register',
@@ -66,12 +67,12 @@ export default {
   },
   computed: {
     loggedIn() {
-      return this.$store.state.auth.status.loggedIn;
+      return this.$store.state.auth.status.loggedIn && Vue.config.password != null;
     }
   },
   mounted() {
     if (this.loggedIn) {
-      this.$router.push('/profile');
+      this.$router.push('/home');
     }
   },
   methods: {
@@ -84,6 +85,12 @@ export default {
             data => {
               this.message = data.message;
               this.successful = true;
+              this.$router.push({
+                name: 'login',
+                params: {
+                  successMessage: 'Спасибо за регистрацию, авторизуйтесь пожалуйста'
+                }
+              });
             },
             error => {
               this.message =

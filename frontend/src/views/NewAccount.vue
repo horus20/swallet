@@ -81,7 +81,13 @@ export default {
         if (this.account.alias && this.account.secret) {
           this.$store.dispatch('account/newAccount', this.account).then(
             () => {
-              this.$router.push('/home');
+              this.$router.push({
+                name: 'home',
+                params: {
+                  status: 'success',
+                  successMessage: 'Аккаунт успешно создан, доступ появится в течении пары минут',
+                }
+              });
             },
             error => {
               this.loading = false;

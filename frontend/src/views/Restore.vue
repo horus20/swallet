@@ -1,53 +1,39 @@
 <template>
   <div class="col-md-12">
-    <div v-if="successMessage"  class="alert alert-success alert-dismissible fade show" role="alert">
-      {{ successMessage }}
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-
     <div class="card card-container">
-      <img
-        id="profile-img"
-        src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-        class="profile-img-card"
-      />
-      <form name="form" @submit.prevent="handleLogin">
+      <h5 class="card-title">Восстановление доступа</h5>
+      <form name="form" @submit.prevent="handleRestore">
         <div class="form-group">
-          <label for="phone">Телефон</label>
+          <label for="alias">Публичное имя</label>
           <input
-            v-model="user.phone"
+            v-model="account.alias"
             v-validate="'required'"
             type="text"
             class="form-control"
-            name="phone"
+            name="alias"
+            disabled
           />
-          <div
-            v-if="errors.has('phone')"
-            class="alert alert-danger"
-            role="alert"
-          >Телефон обязателен!</div>
         </div>
         <div class="form-group">
-          <label for="password">Пароль</label>
+          <label for="secret">Секретное слово</label>
           <input
-            v-model="user.password"
+            v-model="account.secret"
             v-validate="'required'"
-            type="password"
+            type="secret"
             class="form-control"
-            name="password"
+            name="secret"
           />
+          <small id="secretHelp" class="form-text text-muted">Секретное слово необходимо для восстановления доступа</small>
           <div
-            v-if="errors.has('password')"
+            v-if="errors.has('secret')"
             class="alert alert-danger"
             role="alert"
-          >Пароль обязателен!</div>
+          >Секретное слово обязателено!</div>
         </div>
         <div class="form-group">
           <button class="btn btn-primary btn-block" :disabled="loading">
             <span v-show="loading" class="spinner-border spinner-border-sm"></span>
-            <span>Войти</span>
+            <span>Восстановить</span>
           </button>
         </div>
         <div class="form-group">
@@ -59,32 +45,30 @@
 </template>
 
 <script>
-import User from '../models/user';
+import Account from "@/models/account";
+import Vue from "vue";
 
 export default {
-  name: 'Login',
+  name: 'Restore',
   data() {
-    const successMessage = this.$route.params.successMessage;
+    const account = this.$route.params.account;
 
     return {
-      user: new User('', ''),
+      account: new Account(
+        account.alias,
+        ''
+      ),
       loading: false,
       message: '',
-      successMessage,
+      accountEntity: account,
     };
   },
   computed: {
-    loggedIn() {
-      return this.$store.state.auth.status.loggedIn;
-    }
   },
   created() {
-    if (this.loggedIn) {
-      this.$router.push('/home');
-    }
   },
   methods: {
-    handleLogin() {
+    handleRestore() {
       this.loading = true;
       this.$validator.validateAll().then(isValid => {
         if (!isValid) {
@@ -92,10 +76,20 @@ export default {
           return;
         }
 
-        if (this.user.phone && this.user.password) {
-          this.$store.dispatch('auth/login', this.user).then(
-            () => {
-              this.$router.push('/home');
+        if (this.account.alias && this.account.secret) {
+          this.$store.dispatch('account/restore', {
+            restoreAccount: this.account,
+            account: this.accountEntity,
+          }).then(
+            (key) => {
+              this.$router.push({
+                name: 'home',
+                params: {
+                  key,
+                  status: 'success',
+                  successMessage: 'Ключи успешно отправлены, доступ будет восстановлен в течении пары минут',
+                }
+              });
             },
             error => {
               this.loading = false;

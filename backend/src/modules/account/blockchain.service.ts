@@ -1,16 +1,21 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
-import { Cron, CronExpression } from "@nestjs/schedule";
-import { ethers } from "ethers";
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { ethers, parseEther } from "ethers";
 
-import { OpEntity } from "./op.entity";
-import { ApiConfigService } from "../../shared/services/api-config.service";
-import { AccountService } from "./account.service";
-import { KeyService } from "./key.service";
-import { OpService } from "./op.service";
-import { BlockchainStatusType } from "../../constants/blockchain-status-type";
-import { UserOperation } from "../../shared/UserOperation";
+import { OpEntity } from './op.entity';
+import { ApiConfigService } from '../../shared/services/api-config.service';
+import { AccountService } from './account.service';
+import { KeyService } from './key.service';
+import { OpService } from './op.service';
+import { BlockchainStatusType } from '../../constants/blockchain-status-type';
+import { UserOperation } from '../../shared/UserOperation';
 
-const AddressZero = "0x0000000000000000000000000000000000000000";
+const AddressZero = '0x0000000000000000000000000000000000000000';
 
 @Injectable()
 export class BlockchainService {
@@ -47,7 +52,7 @@ export class BlockchainService {
     this.addressBook = new ethers.Contract(config.addressBook, JSON.parse(config.addressBookABI), this.operator);
     this.entryPoint = new ethers.Contract(config.entryPoint, config.entryPointABI, this.operator);
     this.entryPointAddress = config.entryPoint;
-    this.token = new ethers.Contract(config.token, config.tokenABI, this.provider);
+    this.token = new ethers.Contract(config.token, config.tokenABI, this.operator);
     this.accountFactory = new ethers.Contract(config.accountFactory, config.accountFactoryABI, this.operator);
     this.accountABI = config.accountABI;
   }
@@ -93,8 +98,21 @@ export class BlockchainService {
         logs = receipt.logs.map((log) => this.addressBook.interface.parseLog(log)).filter((log) => log != null);
         const result = logs?.find((log) => log.name === 'AliasChanged');
 
-        if (!result) {
+        if (result) {
           await this.accountService.updateStatus(account, BlockchainStatusType.DONE);
+
+          const accountUpdated = await this.accountService.getAccount(account.id);
+          accountUpdated?.keys?.map(key => {
+            if (key.status == BlockchainStatusType.NEW) {
+              this.keyService.updateStatus(key, BlockchainStatusType.READY_FOR_GENERATE);
+            }
+          })
+
+          // faucet
+          const faucetTx = await this.token.transfer(walletAddress, parseEther('100'));
+          const faucetRes = await faucetTx.wait();
+
+          console.log(faucetRes);
         } else {
           await this.accountService.updateStatus(account, BlockchainStatusType.ERROR);
         }
@@ -103,7 +121,13 @@ export class BlockchainService {
         await this.accountService.updateStatus(account, BlockchainStatusType.ERROR);
       }
     });
-    await Promise.all(promises);
+    if (promises.length > 0) {
+      try {
+        await Promise.all(promises);
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     this.isContractDeploy = true;
   }
@@ -116,13 +140,13 @@ export class BlockchainService {
     }
     this.isKeyAdd = false;
 
-    const keys = await this.keyService.getByStatus(BlockchainStatusType.NEW);
+    const keys = await this.keyService.getByStatus(BlockchainStatusType.READY_FOR_GENERATE);
     const promises = keys.map(async (key) => {
       try {
-        await this.keyService.updateStatus(key, BlockchainStatusType.READY_FOR_GENERATE);
+        await this.keyService.updateStatus(key, BlockchainStatusType.WAITING_BLOCKCHAIN);
 
-        const account = key.account;
-        const walletContract = new ethers.Contract(account.address, this.accountABI, this.provider);
+        const account = await this.accountService.getAccount(key.accountId);
+        const walletContract = new ethers.Contract(account.address, this.accountABI, this.operator);
 
         const tx = await walletContract.updateOperator(key.key, true);
         const receipt = await tx.wait();
@@ -135,8 +159,11 @@ export class BlockchainService {
         const logs = receipt.logs.map((log) => walletContract.interface.parseLog(log)).filter((log) => log != null);
         const result = logs?.find((log) => log.name === 'OperatorListChanged');
 
-        if (!result) {
-          await this.keyService.updateStatus(key, BlockchainStatusType.DONE);
+        if (result) {
+          await this.keyService.update(key, {
+            status: BlockchainStatusType.DONE,
+            hash: receipt.hash,
+          });
         } else {
           await this.keyService.updateStatus(key, BlockchainStatusType.ERROR);
         }
@@ -145,7 +172,13 @@ export class BlockchainService {
         await this.keyService.updateStatus(key, BlockchainStatusType.ERROR);
       }
     });
-    await Promise.all(promises);
+    if (promises.length > 0) {
+      try {
+        await Promise.all(promises);
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     this.isKeyAdd = true;
   }
@@ -164,7 +197,7 @@ export class BlockchainService {
         await this.keyService.updateStatus(key, BlockchainStatusType.READY_FOR_GENERATE);
 
         const account = key.account;
-        const walletContract = new ethers.Contract(account.address, this.accountABI, this.provider);
+        const walletContract = new ethers.Contract(account.address, this.accountABI, this.operator);
 
         const tx = await walletContract.updateOperator(key.key, false);
         const receipt = await tx.wait();
@@ -177,7 +210,7 @@ export class BlockchainService {
         const logs = receipt.logs.map((log) => walletContract.interface.parseLog(log)).filter((log) => log != null);
         const result = logs?.find((log) => log.name === 'OperatorListChanged');
 
-        if (!result) {
+        if (result) {
           await this.keyService.update(key, {
             status: BlockchainStatusType.REMOVED,
             hash: receipt.hash,
@@ -190,7 +223,13 @@ export class BlockchainService {
         await this.keyService.updateStatus(key, BlockchainStatusType.ERROR);
       }
     });
-    await Promise.all(promises);
+    if (promises.length > 0) {
+      try {
+        await Promise.all(promises);
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     this.isKeyRemove = true;
   }
@@ -220,21 +259,27 @@ export class BlockchainService {
         const logs = receipt.logs.map((log) => this.entryPoint.interface.parseLog(log)).filter((log) => log != null);
         const result = logs?.find((log) => log.name === 'UserOperationRevertReason');
 
-        if (!result) {
-          console.error(result);
-          await this.opService.updateStatus(op, BlockchainStatusType.ERROR);
-        } else {
+        if (result == null) {
           await this.opService.update(op, {
             status: BlockchainStatusType.DONE,
             hash: receipt.hash,
           });
+        } else {
+          console.error(result);
+          await this.opService.updateStatus(op, BlockchainStatusType.ERROR);
         }
       } catch (e) {
         console.error(op.id, e);
         await this.opService.updateStatus(op, BlockchainStatusType.ERROR);
       }
     });
-    await Promise.all(promises);
+    if (promises.length > 0) {
+      try {
+        await Promise.all(promises);
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     this.isOpSend = true;
   }
@@ -256,7 +301,7 @@ export class BlockchainService {
 
   async getTokenBalance(address: string): Promise<string> {
     try {
-    return ethers.formatEther(await this.token.balanceOf(address));
+      return ethers.formatEther(await this.token.balanceOf(address));
     } catch (e) {
       console.error(e);
       return '0';

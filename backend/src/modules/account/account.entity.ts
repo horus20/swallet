@@ -14,7 +14,7 @@ export class AccountEntity extends AbstractEntity<AccountDto> {
   @Column({ unique: true, nullable: false })
   alias: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, select: false })
   secret: string;
 
   @Column({ nullable: true })

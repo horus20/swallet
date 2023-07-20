@@ -210,6 +210,7 @@ describe('SAccount contract', () => {
       const verificationGasLimit = 100000;
       const maxFeePerGas = 3e9;
       const chainId = await ethers.provider.getNetwork().then((net) => net.chainId);
+      console.log(chainId);
 
       const callData = sAccount.interface.encodeFunctionData('execute', [testWallet.address, parseEther('0.1'), '0x']);
       const nonce = await sAccount.getNonce();
@@ -267,7 +268,7 @@ describe('SAccount contract', () => {
       const maxFeePerGas = 3e9;
       const chainId = await ethers.provider.getNetwork().then((net) => net.chainId);
 
-      const transferCallData = rdrToken.interface.encodeFunctionData('transfer', [testWallet.address, 51]);
+      const transferCallData = rdrToken.interface.encodeFunctionData('transfer', [testWallet.address, 10]);
       const callData = sAccount.interface.encodeFunctionData('execute', [rdrToken.address, parseEther('0'), transferCallData]);
       const nonce = await sAccount.getNonce();
       const unsignedUserOp = fillUserOpDefaults({
@@ -280,6 +281,8 @@ describe('SAccount contract', () => {
       });
 
       const userOp: UserOperation = signUserOp(unsignedUserOp, wallet, sEntryPoint.address, chainId);
+
+      console.log(userOp);
       // const userOpHash = await getUserOpHash(userOp, sEntryPoint.address, chainId);
       // console.log('Try to run userOp, hash: ', userOpHash, userOp, 'owner: ', owner.address);
 
@@ -288,7 +291,7 @@ describe('SAccount contract', () => {
 
       const tx = await sEntryPoint.connect(owner).handleOps([userOp], AddressZero);
       const result = await tx.wait();
-      console.log(result);
+      // console.log(result);
 
       const newBalanceSAccount = (await rdrToken.balanceOf(sAccount.address)).toString();
       const newBalanceTestWallet = (await rdrToken.balanceOf(testWallet.address)).toString();

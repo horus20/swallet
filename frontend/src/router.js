@@ -20,6 +20,7 @@ export const router = new Router({
     },
     {
       path: '/login',
+      name: 'login',
       component: Login
     },
     {
@@ -49,12 +50,23 @@ export const router = new Router({
       name: 'account',
       // lazy-loaded
       component: () => import('./views/NewAccount.vue')
-    }
+    },
+    {
+      path: '/transfer',
+      name: 'transfer',
+      component: () => import('./views/Transfer.vue')
+    },
+    {
+      path: '/restore',
+      name: 'restore',
+      // lazy-loaded
+      component: () => import('./views/Restore.vue')
+    },
   ]
 });
 
 router.beforeEach((to, from, next) => {
-   const publicPages = ['/login', '/register', '/lost'];
+   const publicPages = ['/login', '/register'];
    const authRequired = !publicPages.includes(to.path);
    const loggedIn = localStorage.getItem('user')
      && Vue.config.password != null;
