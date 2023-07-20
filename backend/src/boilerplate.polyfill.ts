@@ -27,12 +27,14 @@ function groupRows<T>(
   if (alias.metadata.tableType === 'view') {
     keys.push(
       ...alias.metadata.columns.map((column) =>
+        // @ts-ignore
         DriverUtils.buildAlias(driver, alias.name, column.databaseName),
       ),
     );
   } else {
     keys.push(
       ...alias.metadata.primaryColumns.map((column) =>
+        // @ts-ignore
         DriverUtils.buildAlias(driver, alias.name, column.databaseName),
       ),
     );
@@ -193,6 +195,7 @@ SelectQueryBuilder.prototype.paginate = async function (
   const keys = alias.metadata.primaryColumns.map((column) =>
     DriverUtils.buildAlias(
       this.connection.driver,
+      // @ts-ignore
       alias.name,
       column.databaseName,
     ),

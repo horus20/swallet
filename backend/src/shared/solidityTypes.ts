@@ -1,5 +1,6 @@
 // define the same export types as used by export typechain/ethers
 import { BigNumberish } from 'ethers'
+// @ts-ignore
 import { BytesLike } from '@ethersproject/bytes'
 
 export type address = string
