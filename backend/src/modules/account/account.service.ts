@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -59,16 +60,21 @@ export class AccountService {
     userId: Uuid,
     accountPageOptionsDto: AccountPageOptionsDto,
   ): Promise<PageDto<AccountDto>> {
-    const queryBuilder = this.accountRepository
-      .createQueryBuilder('account')
-      .leftJoinAndSelect('account.keys', 'key', 'key.isRemoved = false')
-      .where('account.user_id = :userId', { userId })
-      .andWhere('account.isRemoved = false');
-    const [items, accountMetaDto] = await queryBuilder.paginate(
-      accountPageOptionsDto,
-    );
+    try {
+      const queryBuilder = this.accountRepository
+        .createQueryBuilder('account')
+        .leftJoinAndSelect('account.keys', 'key', 'key.isRemoved = false')
+        .where('account.user_id = :userId', { userId })
+        .andWhere('account.isRemoved = false');
+      const [items, accountMetaDto] = await queryBuilder.paginate(
+        accountPageOptionsDto,
+      );
 
-    return items.toPageDto(accountMetaDto);
+      return items.toPageDto(accountMetaDto);
+    } catch (e) {
+      console.error(e);
+      throw new InternalServerErrorException(e);
+    }
   }
 
   async getAccount(
