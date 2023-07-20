@@ -30,7 +30,7 @@ Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.use(Vuex);
 Vue.use(ethers);
 
-const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545/');
+const provider = new ethers.providers.JsonRpcProvider('https://rpc.test.siberium.net/');
 Vue.config.provider = provider;
 Vue.config.token =  new ethers.Contract(
   '0xBdcC9a2e17eaa8E6ED524AD9A105b22d3CC775Bc',
